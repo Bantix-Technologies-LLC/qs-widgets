@@ -27,14 +27,7 @@ function App() {
         <main id="page-wrap">
           <Router>
             <Routes>
-              <Route
-                path="/"
-                element={
-                  <div style={{ height: "100px", width: "1000px" }}>
-                    <EventConGraph />
-                  </div>
-                }
-              ></Route>
+              <Route path="/eventcongraph" element={<EventConGraph />}></Route>
             </Routes>
           </Router>
         </main>

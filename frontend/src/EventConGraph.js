@@ -10,6 +10,7 @@ import priceIndicator from "highcharts/modules/price-indicator";
 import fullScreen from "highcharts/modules/full-screen";
 import stockTools from "highcharts/modules/stock-tools";
 import QSIcon from "./graphQS.png";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useMediaQuery } from "react-responsive";
 import DropdownButton from "react-bootstrap/DropdownButton";
 import { NavDropdown, Dropdown } from "react-bootstrap";
@@ -25,6 +26,11 @@ stockTools(Highcharts);
 
 //Graph for OHLC, Volume, and OI for given future sym
 const EODSummaryGraph = (props) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [sym, setSym] = useState(searchParams.get("sym"));
+  const [width, setWidth] = useState(searchParams.get("width"));
+  const [height, setHeight] = useState(searchParams.get("height"));
+
   const zoomButton = useRef(null);
   const isMobile = useMediaQuery({ query: `(max-width: 1200px)` }); //state for detecting device that app is running on
   const chartRef = useRef(null);
@@ -54,6 +60,12 @@ const EODSummaryGraph = (props) => {
 
   //SET HIGHCHARTS OPTIONS
   useEffect(() => {
+    console.log(
+      searchParams.get("sym"),
+      width,
+      height,
+      searchParams.toString()
+    );
     try {
       if (data.includes("noneAvail"))
         containerRef.current.style.opacity = "0.6";
@@ -208,6 +220,8 @@ const EODSummaryGraph = (props) => {
             enabled: true,
           },
       chart: {
+        width: width,
+        height: height,
         zoomType: "x",
         panning: true,
 
@@ -228,7 +242,7 @@ const EODSummaryGraph = (props) => {
         borderColor: !props.lightMode ? "#606063" : {},
         plotBorderColor: !props.lightMode ? "#606063" : {},
         borderWidth: 1,
-        height: 550,
+        // height: 550,
         events: {
           render: function () {
             const chart = this,
@@ -2113,8 +2127,8 @@ const EODSummaryGraph = (props) => {
 
     axios(
       process.env.NODE_ENV === "production"
-        ? `https://quikoptions.info/api/EODSummaryData?EODSummaryDataProdSym=${"OZC"}`
-        : `https://quikoptions.info/api/EODSummaryData?EODSummaryDataProdSym=${"OZC"}`
+        ? `https://quikoptions.info/api/EODSummaryData?EODSummaryDataProdSym=${sym}`
+        : `https://quikoptions.info/api/EODSummaryData?EODSummaryDataProdSym=${sym}`
     ).then((response) => {
       console.log(response.data);
 
