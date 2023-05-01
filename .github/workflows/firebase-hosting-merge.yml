@@ -25,7 +25,7 @@ jobs:
         working-directory: frontend
         run: |
           sudo rm package-lock.json
-          npm ci
+          npm i -g
           npm run build
       - name: firebase deploy
         uses: FirebaseExtended/action-hosting-deploy@v0
