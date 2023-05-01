@@ -10,11 +10,11 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Firebase deploy
-        uses: actions/checkout@v3
       - name: build frontend
         working-directory: /Users/sussman/qs-widgets/frontend
-        run: npm run build
+        command: npm run build
+      - name: Firebase deploy
+        uses: actions/checkout@v3
       - name: firebase deploy2
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
