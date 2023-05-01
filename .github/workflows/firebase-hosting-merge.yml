@@ -18,12 +18,14 @@ jobs:
       - name: AWS SSM Send-Command
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '18.12.1'
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
       - name: run npm build
         working-directory: frontend
-        run: npm install && npm run build
+        run: |
+        npm install
+        npm run build
       - name: firebase deploy
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
