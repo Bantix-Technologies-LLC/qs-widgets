@@ -13,7 +13,7 @@ jobs:
       - name: Firebase deploy
         uses: actions/checkout@v3
       - name: build frontend
-        working-directory: ./../frontend
+        working-directory: /Users/sussman/qs-widgets/frontend
         run: npm run build
       - name: firebase deploy2
         uses: FirebaseExtended/action-hosting-deploy@v0
