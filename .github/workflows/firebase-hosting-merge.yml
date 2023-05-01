@@ -21,9 +21,11 @@ jobs:
           node-version: '18'
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
+
       - name: run npm commands
           working-directory: frontend
           run: npm run build
+          
       - name: firebase deploy
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
