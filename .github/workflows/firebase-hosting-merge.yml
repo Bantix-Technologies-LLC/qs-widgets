@@ -24,7 +24,6 @@ jobs:
       - name: run npm build
         working-directory: frontend
         run: |
-          sudo rm package-lock.json
           npm install
           npm run build
       - name: firebase deploy
