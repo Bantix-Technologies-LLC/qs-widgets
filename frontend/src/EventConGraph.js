@@ -9,7 +9,7 @@ import annotationsAdvanced from "highcharts/modules/annotations-advanced";
 import priceIndicator from "highcharts/modules/price-indicator";
 import fullScreen from "highcharts/modules/full-screen";
 import stockTools from "highcharts/modules/stock-tools";
-import QSIcon from "./graphQS.png";
+import QSIcon from "./QSIconDark3.png";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useMediaQuery } from "react-responsive";
 import DropdownButton from "react-bootstrap/DropdownButton";
@@ -38,20 +38,9 @@ const EODSummaryGraph = (props) => {
   const loadSpinnerRef = useRef(null);
   const noneAvailRef = useRef(null);
 
-  const [data, setData] = useState([
-    [1609560063, 0, 0, 0, 0, 0],
-    [
-      Date.parse(new Date().toUTCString()) -
-        new Date(new Date().toUTCString() + " UTC").getTimezoneOffset() * 60000,
-      0,
-      0,
-      0,
-      0,
-      0,
-    ],
-  ]);
-
-  const [groupingUnits, setGroupingUnits] = useState();
+  const [categories, setCategories] = useState([[0, 0, 0, 0, 0, 0]]);
+  const [callData, setCallData] = useState([[0, 0, 0, 0, 0, 0]]);
+  const [putData, setPutData] = useState([[0, 0, 0, 0, 0, 0]]);
 
   const [options, setOptions] = useState();
 
@@ -67,7 +56,7 @@ const EODSummaryGraph = (props) => {
       searchParams.toString()
     );
     try {
-      if (data.includes("noneAvail"))
+      if (callData.includes("noneAvail"))
         containerRef.current.style.opacity = "0.6";
     } catch {}
     Highcharts.setOptions({
@@ -76,177 +65,104 @@ const EODSummaryGraph = (props) => {
         thousandsSep: ",",
       },
     });
-    chartRef.current = Highcharts.stockChart(containerRef.current, {
-      chartType: "stock",
-      navigator: {
-        enabled: false,
-        handles: !props.lightMode
-          ? {
-              backgroundColor: "#666",
-              borderColor: "#AAA",
-            }
-          : {},
 
-        outlineColor: !props.lightMode ? "#CCC" : "#cccccc",
-        maskFill: "rgba(255,255,255,0.1)",
-        xAxis: {
-          //   type: "categories",
+    chartRef.current = Highcharts.chart(containerRef.current, {
+      chartType: "bar",
+      colors: [
+        "#B99840",
 
-          //   categories: data.map((d, i) => data[i][0]),
-          gridLineColor: !props.lightMode ? "#505053" : "#e6e6e6",
-          dateTimeLabelFormats: {
-            month: "%b %e, %Y",
-            week: "%b %e, %Y",
-            day: "%b %e",
-            hour: "%l %P",
-            minute: "%l:%M %P",
-          },
-        },
-        series: {
-          color: !props.lightMode ? "#7798BF" : undefined,
-          lineColor: "#A6C7ED",
-          type: "line",
-        },
-      },
-      drilldown: {
-        activeAxisLabelStyle: {
-          color: !props.lightMode ? "#F0F0F3" : "#003399",
-        },
-        activeDataLabelStyle: {
-          color: !props.lightMode ? "#F0F0F3" : "#003399",
-        },
-      },
-      navigation: {
-        buttonOptions: {
-          symbolStroke: !props.lightMode ? "#DDDDDD" : "#666666",
-          theme: {
-            fill: !props.lightMode ? "#505053" : {},
-            states: {
-              hover: {
-                fill: !props.lightMode ? "#707073" : {},
-              },
-              select: {
-                fill: !props.lightMode ? "#707073" : {},
-              },
-            },
-          },
-        },
-        bindingsClassName: "tools-container", // informs Stock Tools where to look for HTML elements for adding technical indicators, annotations etc.
-      },
-      stockTools: {
-        gui: {
-          enabled: isMobile ? false : true, // disable the built-in toolbar
-          buttons: [
-            "fullScreen",
-            "currentPriceIndicator",
-            "typeChange",
-            "separator",
+        "#942B36",
+        "#024E73",
 
-            "indicators",
-            "simpleShapes",
-            "lines",
-            "crookedLines",
-            "measure",
-            "advanced",
-            "toggleAnnotations",
-            "separator",
-            "verticalLabels",
-            "flags",
-            "separator",
-            "zoomChange",
-
-            "separator",
-            "saveChart",
-          ],
-        },
-      },
-      legend: isMobile
-        ? {
-            itemHoverStyle: {
-              color: !props.lightMode ? "#FFF" : {},
-            },
-            itemHiddenStyle: {
-              color: !props.lightMode ? "#606063" : {},
-            },
-            title: {
-              style: {
-                color: !props.lightMode ? "#C0C0C0" : {},
-              },
-            },
-            itemStyle: {
-              color: !props.lightMode ? "#E0E0E3" : {},
-
-              fontSize: "11px",
-              fontWeight: "normal",
-            },
-            padding: 6,
-            margin: 8,
-            enabled: true,
-          }
-        : {
-            width:
-              props.EODSummaryType ===
-                "CallYTDVol, CallYTDADV, CallADV, CallVol, PutYTDVol, PutYTDADV, PutADV, PutVol" ||
-              props.EODSummaryType === "FutYTDVol" ||
-              props.EODSummaryType === "FutYTDADV"
-                ? 500
-                : 500,
-
-            itemHoverStyle: {
-              color: !props.lightMode ? "#FFF" : {},
-            },
-            itemHiddenStyle: {
-              color: !props.lightMode ? "#606063" : {},
-            },
-            title: {
-              style: {
-                color: !props.lightMode ? "#C0C0C0" : {},
-              },
-            },
-
-            itemStyle: {
-              //   textOverflow: null,
-              //   width: 60, // or whatever
-              color: !props.lightMode ? "#E0E0E3" : {},
-              fontSize: "11px",
-              fontWeight: "normal",
-            },
-            padding: 6,
-            margin: 8,
-            align: "right",
-            verticalAlign: "top",
-            y: -115,
-            x: -25,
-            enabled: true,
-          },
+        "#E1A33C",
+        "#B31E30",
+        "#B38904",
+        "#B3701E",
+        "#42B39A",
+        "#02757D",
+        "#024E73",
+        "#B3431E",
+        "#f39c12",
+      ],
       chart: {
         width: width,
         height: height,
-        zoomType: "x",
-        panning: true,
 
-        panKey: "shift",
-        type: "column",
-        marginTop: 0,
-        marginBottom: 50,
-        backgroundColor: !props.lightMode
-          ? {
-              linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
-              stops: [
-                [0, "rgb(30,38,50)"],
-                [1, "rgb(56,70,86)"],
-              ],
-            }
-          : "white",
-
-        borderColor: !props.lightMode ? "#606063" : {},
-        plotBorderColor: !props.lightMode ? "#606063" : {},
+        marginBottom: 70,
+        backgroundColor: {
+          linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
+          stops: [
+            [0, "#054D3D"],
+            [1, "#076652"],
+          ],
+        },
+        borderColor: "#606063",
+        plotBorderColor: "#606063",
         borderWidth: 1,
         // height: 550,
         events: {
+          redraw() {
+            console.log("gg", this.yAxis[0].getExtremes());
+            this.addAnnotation({
+              labelOptions: {
+                overflow: "allow",
+                y: -10,
+                shape: "rect",
+                borderColor: "transparent",
+                backgroundColor: "transparent",
+
+                // color: "red",
+                // className: "noLabel",
+                style: {
+                  //   color: "red",
+                  fontSize: `${Math.min(
+                    Math.max(12, (width / 100) * 1.9),
+                    17
+                  )}pt`,
+                },
+              },
+              shapeOptions: {
+                type: "circle",
+                r: 4,
+                strokeWidth: 0,
+              },
+              labels: [
+                {
+                  text: "No",
+                  align: "center",
+                  point: {
+                    y: this.yAxis[0].getExtremes().max / 2,
+                    x: -0.3,
+                    yAxis: 0,
+                    xAxis: 0,
+                  },
+                  style: {
+                    color: "red",
+                  },
+                },
+                {
+                  text: "Yes",
+                  align: "center",
+
+                  point: {
+                    y: -this.yAxis[0].getExtremes().max / 2,
+                    x: -0.3,
+                    yAxis: 0,
+                    xAxis: 0,
+                  },
+                  style: {
+                    color: "green",
+                  },
+                },
+              ],
+              draggable: "",
+              crop: false,
+            });
+          },
           render: function () {
             const chart = this,
               renderer = chart.renderer;
+
             try {
               if (
                 document.getElementsByClassName("highcharts-data-table")[0] &&
@@ -270,10 +186,10 @@ const EODSummaryGraph = (props) => {
 
             // Create groups
             chart.customImgGroup = renderer.g("customImgGroup").add();
-
+            console.log(chart);
             // Render texts
             chart.renderer
-              .image(QSIcon, chart.plotLeft + chart.plotSizeX - 75, 75, 50, 50)
+              .image(QSIcon, chart.plotBox.width, 20, 50, 50)
               .add(chart.customImgGroup);
           },
           load() {
@@ -282,1775 +198,353 @@ const EODSummaryGraph = (props) => {
               chart.stockTools.showhideBtn.click();
             }
           },
-
-          selection: function () {
-            var ch = this;
-            zoomButton.current = ch.renderer
-              .button(
-                "Reset zoom",
-                null,
-                null,
-                function () {
-                  ch.xAxis[0].setExtremes(null, null);
-                },
-                {
-                  zIndex: 20,
-                }
-              )
-              .attr({
-                id: "resetZoom",
-                align: "right",
-                title: "Reset zoom level 1:1",
-              })
-              .add()
-              .align(
-                {
-                  align: "right",
-                  x: -15,
-                  y: 40,
-                },
-                false,
-                null
-              );
-          },
+        },
+      },
+      //   annotations: [
+      //     {
+      //       labelOptions: {
+      //         overflow: "allow",
+      //         y: -10,
+      //         shape: "rect",
+      //         borderColor: "transparent",
+      //         backgroundColor: "transparent",
+      //         style: {
+      //           fontSize: "11pt",
+      //         },
+      //       },
+      //       shapeOptions: {
+      //         type: "circle",
+      //         r: 4,
+      //         strokeWidth: 0,
+      //       },
+      //       labels: [
+      //         {
+      //           text: "No",
+      //           align: "center",
+      //           point: {
+      //             y:
+      //               (Math.max(
+      //                 Math.max(
+      //                   ...callData.map((callprice) => {
+      //                     return Math.abs(callprice);
+      //                   })
+      //                 ),
+      //                 Math.max(...putData)
+      //               ) /
+      //                 2) *
+      //               1.3,
+      //             x: putData.length - 2,
+      //             yAxis: 0,
+      //             xAxis: 0,
+      //           },
+      //           style: {
+      //             color: "red",
+      //           },
+      //         },
+      //         {
+      //           text: "Yes",
+      //           align: "center",
+      //           point: {
+      //             y:
+      //               -Math.max(
+      //                 Math.max(
+      //                   ...callData.map((callprice) => {
+      //                     return Math.abs(callprice);
+      //                   })
+      //                 ),
+      //                 Math.max(...putData)
+      //               ) / 2,
+      //             x: putData.length - 2,
+      //             yAxis: 0,
+      //             xAxis: 0,
+      //           },
+      //           style: {
+      //             color: "green",
+      //           },
+      //         },
+      //       ],
+      //       shapes: [
+      //         {
+      //           point: {
+      //             y: -20,
+      //             // x: settings.PlotLines[0].value,
+      //             yAxis: 0,
+      //             xAxis: 0,
+      //           },
+      //           //   fill: settings.PlotLines[0].color,
+      //         },
+      //         {
+      //           point: {
+      //             y: 20,
+      //             // x: settings.PlotLines[1].value,
+      //             yAxis: 0,
+      //             xAxis: 0,
+      //           },
+      //           //   fill: settings.PlotLines[1].color,
+      //         },
+      //       ],
+      //       draggable: "",
+      //       crop: false,
+      //     },
+      //   ],
+      tooltip: {
+        backgroundColor: "transparent",
+        style: {
+          color: "#F0F0F0",
         },
       },
       labels: {
-        style: !props.lightMode
-          ? {
-              color: "#707073",
-            }
-          : {},
+        style: {
+          color: "#707073",
+        },
       },
-
+      drilldown: {
+        activeAxisLabelStyle: {
+          color: "#F0F0F3",
+        },
+        activeDataLabelStyle: {
+          color: "#F0F0F3",
+        },
+      },
       plotOptions: {
         series: {
           dataLabels: {
-            color: !props.lightMode ? "#F0F0F3" : {},
+            color: "#F0F0F3",
             style: {
               fontSize: "13px",
             },
           },
-          marker: !props.lightMode
-            ? {
-                lineColor: "#333",
-              }
-            : {},
-          turboThreshold: 10000,
-          dataGrouping: {
-            enabled: false,
+          marker: {
+            lineColor: "#333",
           },
-          states: {
-            hover: { enabled: data.includes("noneAvail") ? false : true },
-
-            inactive: {
-              opacity: 1,
-            },
-          },
+          stacking: "normal",
+          borderRadius: "3%",
         },
         boxplot: {
-          fillColor: !props.lightMode ? "#505053" : {},
+          fillColor: "#505053",
         },
         candlestick: {
-          maxPointWidth: 25,
-
-          lineColor: !props.lightMode ? "white" : "black",
+          lineColor: "white",
         },
         errorbar: {
-          color: !props.lightMode ? "white" : {},
-        },
-        line: {
-          lineWidth: 1,
-        },
-        ohlc: {
-          maxPointWidth: 25,
-        },
-        column: {
-          maxPointWidth: 25,
-          stacking:
-            props.EODSummaryType === "CallADV, PutADV, FutADV" ||
-            props.EODSummaryType ===
-              "CallYTDVol, CallYTDADV, CallADV, CallVol, PutYTDVol, PutYTDADV, PutADV, PutVol"
-              ? "normal"
-              : "normal",
-          //   dataLabels: {
-          //     enabled: true,
-          //   },
+          color: "white",
         },
       },
-      scrollbar: !props.lightMode
-        ? {
-            barBackgroundColor: "#808083",
-            barBorderColor: "#808083",
-            buttonArrowColor: "#CCC",
-            buttonBackgroundColor: "#606063",
-            buttonBorderColor: "#606063",
-            rifleColor: "#FFF",
-            trackBackgroundColor: "#404043",
-            trackBorderColor: "#404043",
-          }
-        : {},
-      rangeSelector: {
-        buttonTheme: !props.lightMode
-          ? {
-              fill: "rgb(44,56,72)",
-              stroke: "#000000",
-              style: {
-                color: "#ccc",
-              },
-              states: {
-                hover: {
-                  fill: "#707073",
-                  stroke: "#000000",
-                  style: {
-                    color: "white",
-                  },
-                },
-                select: {
-                  fill: "#000003",
-                  stroke: "#000000",
-                  style: {
-                    color: "white",
-                  },
-                },
-                disabled: {
-                  fill: "#999",
-                  style: {
-                    color: "#bbb",
-                  },
-                },
-              },
-            }
-          : {},
-        inputStyle: !props.lightMode
-          ? {
-              backgroundColor: "#333",
-              color: "silver",
-            }
-          : {},
-        labelStyle: {
-          color: !props.lightMode ? "silver" : {},
+      //   annotations: [
+      //     {
+      //       labels: [
+      //         {
+      //           point: { x: 0, y: -1500 },
+      //           padding: 25,
+      //           text: "Label",
+      //         },
+      //       ],
+      //     },
+      //   ],
+      legend: {
+        itemMarginBottom: 0,
+        itemMarginTop: 0,
+        margin: 0,
+        x: -30,
+        align: "center",
+        itemStyle: {
+          color: "#E0E0E3",
         },
-        selected: 5,
-        enabled: true,
-        inputEnabled:
-          isMobile ||
-          props.EODSummaryType === "FutYTDVol" ||
-          props.EODSummaryType === "FutYTDADV"
-            ? false
-            : true,
-        allButtonsEnabled: true,
-        verticalAlign: "top",
-        dropdown: isMobile ? "never" : "responsive",
-        x: isMobile ? 0 : 0,
-        y: 0,
-        inputPosition: isMobile
-          ? {
-              x: 0,
-              y: 0,
-            }
-          : {},
-        height: 75,
-
-        buttons: [
-          {
-            type: "month",
-            count: 1,
-            text: "1m",
+        itemHoverStyle: {
+          color: "#FFF",
+        },
+        itemHiddenStyle: {
+          color: "#606063",
+        },
+        title: {
+          style: {
+            color: "#C0C0C0",
           },
-          {
-            type: "month",
-            count: 3,
-            text: "3m",
-          },
-          {
-            type: "month",
-            count: 6,
-            text: "6m",
-          },
-          {
-            type: "ytd",
-            text: "YTD",
-          },
-          {
-            type: "year",
-            count: 1,
-            text: "1y",
-          },
-          {
-            type: "all",
-            text: "All",
-          },
-        ],
+        },
       },
-
+      scrollbar: {
+        barBackgroundColor: "#808083",
+        barBorderColor: "#808083",
+        buttonArrowColor: "#CCC",
+        buttonBackgroundColor: "#606063",
+        buttonBorderColor: "#606063",
+        rifleColor: "#FFF",
+        trackBackgroundColor: "#404043",
+        trackBorderColor: "#404043",
+      },
       title: {
-        text:
-          props.EODSummaryType === "FutADV & FutOpnInt"
-            ? props.prodName + " Monthly Fut ADV and OI"
-            : props.EODSummaryType === "CallADV, PutADV, FutADV"
-            ? props.prodName + " Monthly Option ADV"
-            : props.EODSummaryType ===
-              "CallOpenInt, PutOpenInt, CallVol, PutVol"
-            ? props.prodName + " Monthly OI & Vol"
-            : props.EODSummaryType ===
-              "OICallChg, OIPutChg, CallVolChg, PutVolChg"
-            ? props.prodName + " Monthly OI & Vol Chg"
-            : props.EODSummaryType === "FutYTDVol"
-            ? props.prodName + " Year Over Year Monthly Volume"
-            : props.EODSummaryType === "FutYTDADV"
-            ? props.prodName + " Year Over Year Monthly ADV"
-            : props.EODSummaryType ===
-              "CallYTDVol, CallYTDADV, CallADV, CallVol, PutYTDVol, PutYTDADV, PutADV, PutVol"
-            ? props.prodName + " Monthly YTD Vol & ADV"
-            : "",
-        align: "left",
+        text: "YES",
+        align: "center",
         style: {
-          color: !props.lightMode ? "#E0E0E3" : {},
+          color: "#E0E0E3",
           textTransform: "uppercase",
           fontSize: "16px",
         },
       },
+      navigation: {
+        buttonOptions: {
+          symbolStroke: "#DDDDDD",
+          theme: {
+            fill: "#505053",
+            states: {
+              hover: {
+                fill: "#707073",
+              },
+              select: {
+                fill: "#707073",
+              },
+            },
+          },
+        },
+      },
+      navigator: {
+        handles: {
+          backgroundColor: "#666",
+          borderColor: "#AAA",
+        },
+        outlineColor: "#CCC",
+        maskFill: "rgba(255,255,255,0.1)",
+        series: {
+          color: "#7798BF",
+          lineColor: "#A6C7ED",
+        },
+        xAxis: {
+          gridLineColor: "#505053",
+        },
+      },
       subtitle: {
         style: {
-          color: !props.lightMode ? "#E0E0E3" : {},
+          color: "#E0E0E3",
           textTransform: "uppercase",
         },
       },
-      xAxis: {
-        events: {
-          setExtremes: function (event) {
-            if (
-              (!event.min && !event.max) ||
-              (event.min === event.dataMin && event.max === event.dataMax) ||
-              event.rangeSelectorButton?.text === "All"
-            ) {
-              try {
-                zoomButton.current.destroy();
-              } catch {}
-            }
+
+      xAxis: [
+        {
+          gridLineColor: "white",
+          labels: {
+            style: {
+              color: "#E0E0E3",
+            },
+          },
+          lineColor: "#707073",
+          minorGridLineColor: "#505053",
+          tickColor: "#707073",
+          title: {
+            style: {
+              color: "#A0A0A3",
+            },
+          },
+
+          categories: categories,
+          reversed: true,
+
+          labels: {
+            step: 1,
+          },
+          accessibility: {
+            description: "call",
           },
         },
-
-        minRange: 1,
-        startOnTick: true,
-        showLastLabel: true,
-
-        gridLineColor: !props.lightMode ? "#444" : "#e6e6e6",
-        // offset: 150,
-        type: "datetime",
+        {
+          gridLineColor: "#444",
+          labels: {
+            style: {
+              color: "#E0E0E3",
+            },
+          },
+          lineColor: "#707073",
+          minorGridLineColor: "#505053",
+          tickColor: "#707073",
+          title: {
+            style: {
+              color: "#A0A0A3",
+            },
+          },
+          // mirror axis on right side
+          opposite: true,
+          reversed: true,
+          categories: categories,
+          linkedTo: 0,
+          labels: {
+            step: 1,
+          },
+          accessibility: {
+            description: "put",
+          },
+        },
+      ],
+      yAxis: {
+        gridLineColor: "#E0E0E3",
         labels: {
-          step: 1,
           style: {
-            color: !props.lightMode ? "#E0E0E3" : {},
+            color: "#E0E0E3",
           },
         },
-        lineColor: !props.lightMode ? "#707073" : {},
-        minorGridLineColor: !props.lightMode ? "#505053" : "#f2f2f2",
-        tickColor: !props.lightMode ? "#707073" : {},
+        crosshair: {
+          label: {
+            backgroundColor: "rgba(0, 0, 0, 0.60)",
+          },
+        },
+        lineColor: "#707073",
+        minorGridLineColor: "#505053",
+        tickColor: "#707073",
+        tickWidth: 1,
         title: {
           style: {
-            color: !props.lightMode ? "#A0A0A3" : {},
+            color: "#A0A0A3",
           },
         },
-        dateTimeLabelFormats: {
-          month:
-            props.EODSummaryType === "FutYTDVol" ||
-            props.EODSummaryType === "FutYTDADV"
-              ? "%b<br/>"
-              : "%b<br/>%Y",
-          week:
-            props.EODSummaryType === "FutYTDVol" ||
-            props.EODSummaryType === "FutYTDADV"
-              ? "%b %e<br/>"
-              : "%b %e<br/>%Y",
-          day: "%b %e",
-          hour: "%l %P",
-          minute: "%l:%M %P",
-          second: "%l:%M:%S %P",
-          millisecond: "%l:%M:%S %P",
+
+        title: {
+          text: null,
         },
+        min: callData.includes("noneAvail")
+          ? 0
+          : Math.max(
+              Math.max(
+                ...callData.map((callprice) => {
+                  return Math.abs(callprice);
+                })
+              ),
+              Math.max(...putData)
+            ) * -1,
+        max: callData.includes("noneAvail")
+          ? 0
+          : Math.max(
+              Math.max(
+                ...callData.map((callprice) => {
+                  return Math.abs(callprice);
+                })
+              ),
+              Math.max(...putData)
+            ),
 
-        gridLineWidth: 1,
-      },
-      yAxis:
-        props.EODSummaryType === "FutADV & FutOpnInt"
-          ? [
-              {
-                showEmpty: false,
-
-                endOnTick: true,
-                gridLineColor: !props.lightMode ? "#707073" : "#e6e6e6",
-                lineColor: !props.lightMode ? "#707073" : "#ccd6eb",
-                minorGridLineColor: !props.lightMode ? "#505053" : "#f2f2f2",
-                tickColor: !props.lightMode ? "#707073" : "#ccd6eb",
-                crosshair: {
-                  snap: false,
-                  label: {
-                    padding: 4,
-                  },
-                },
-                labels: {
-                  align: "right",
-                  x: -3,
-                  style: {
-                    color: !props.lightMode ? "#E0E0E3" : {},
-                  },
-                },
-                title: {
-                  text: "Fut ADV",
-                  style: {
-                    color: !props.lightMode ? "#A0A0A3" : {},
-                  },
-                },
-                height: "65%",
-                lineWidth: 1,
-                resize: {
-                  enabled: true,
-                },
-                top: "0%",
-              },
-              {
-                showEmpty: false,
-
-                gridLineColor: !props.lightMode ? "#707073" : {},
-                lineColor: !props.lightMode ? "#707073" : {},
-                minorGridLineColor: !props.lightMode ? "#505053" : {},
-                tickColor: !props.lightMode ? "#707073" : {},
-                crosshair: {
-                  snap: false,
-                  label: {
-                    padding: 4,
-                  },
-                },
-                labels: {
-                  align: "right",
-                  x: -3,
-                  style: {
-                    color: !props.lightMode ? "#E0E0E3" : {},
-                  },
-                },
-                title: {
-                  text: "Fut OI",
-                  style: {
-                    color: !props.lightMode ? "#A0A0A3" : {},
-                  },
-                },
-                top: "65%",
-                height: "35%",
-                offset: 0,
-                lineWidth: 1,
-              },
-            ]
-          : props.EODSummaryType === "CallADV, PutADV, FutADV"
-          ? [
-              {
-                showEmpty: false,
-
-                endOnTick: true,
-                gridLineColor: !props.lightMode ? "#707073" : "#e6e6e6",
-                lineColor: !props.lightMode ? "#707073" : "#ccd6eb",
-                minorGridLineColor: !props.lightMode ? "#505053" : "#f2f2f2",
-                tickColor: !props.lightMode ? "#707073" : "#ccd6eb",
-                crosshair: {
-                  snap: false,
-                  label: {
-                    padding: 4,
-                  },
-                },
-                labels: {
-                  align: "right",
-                  x: -3,
-                  style: {
-                    color: !props.lightMode ? "#E0E0E3" : {},
-                  },
-                },
-                title: {
-                  text: "Option ADV",
-                  style: {
-                    color: !props.lightMode ? "#A0A0A3" : {},
-                  },
-                },
-                height: "65%",
-                lineWidth: 1,
-                resize: {
-                  enabled: true,
-                },
-                top: "0%",
-              },
-              {
-                showEmpty: false,
-
-                gridLineColor: !props.lightMode ? "#707073" : {},
-                lineColor: !props.lightMode ? "#707073" : {},
-                minorGridLineColor: !props.lightMode ? "#505053" : {},
-                tickColor: !props.lightMode ? "#707073" : {},
-                crosshair: {
-                  snap: false,
-                  label: {
-                    padding: 4,
-                  },
-                },
-                labels: {
-                  align: "right",
-                  x: -3,
-                  style: {
-                    color: !props.lightMode ? "#E0E0E3" : {},
-                  },
-                },
-                title: {
-                  text: "Fut ADV",
-                  style: {
-                    color: !props.lightMode ? "#A0A0A3" : {},
-                  },
-                },
-                top: "65%",
-                height: "35%",
-                offset: 0,
-                lineWidth: 1,
-              },
-            ]
-          : props.EODSummaryType === "CallOpenInt, PutOpenInt, CallVol, PutVol"
-          ? [
-              {
-                showEmpty: false,
-
-                endOnTick: true,
-                gridLineColor: !props.lightMode ? "#707073" : "#e6e6e6",
-                lineColor: !props.lightMode ? "#707073" : "#ccd6eb",
-                minorGridLineColor: !props.lightMode ? "#505053" : "#f2f2f2",
-                tickColor: !props.lightMode ? "#707073" : "#ccd6eb",
-                crosshair: {
-                  snap: false,
-                  label: {
-                    padding: 4,
-                  },
-                },
-                labels: {
-                  align: "right",
-                  x: -3,
-                  style: {
-                    color: !props.lightMode ? "#E0E0E3" : {},
-                  },
-                },
-                title: {
-                  text: "Open Interest",
-                  style: {
-                    color: !props.lightMode ? "#A0A0A3" : {},
-                  },
-                },
-                height: "50%",
-                lineWidth: 1,
-                resize: {
-                  enabled: true,
-                },
-                top: "0%",
-              },
-              {
-                showEmpty: false,
-
-                gridLineColor: !props.lightMode ? "#707073" : {},
-                lineColor: !props.lightMode ? "#707073" : {},
-                minorGridLineColor: !props.lightMode ? "#505053" : {},
-                tickColor: !props.lightMode ? "#707073" : {},
-                crosshair: {
-                  snap: false,
-                  label: {
-                    padding: 4,
-                  },
-                },
-                labels: {
-                  align: "right",
-                  x: -3,
-                  style: {
-                    color: !props.lightMode ? "#E0E0E3" : {},
-                  },
-                },
-                title: {
-                  text: "Volume",
-                  style: {
-                    color: !props.lightMode ? "#A0A0A3" : {},
-                  },
-                },
-                top: "50%",
-                height: "50%",
-                offset: 0,
-                lineWidth: 1,
-              },
-            ]
-          : props.EODSummaryType ===
-            "OICallChg, OIPutChg, CallVolChg, PutVolChg"
-          ? [
-              {
-                showEmpty: false,
-
-                endOnTick: true,
-                gridLineColor: !props.lightMode ? "#707073" : "#e6e6e6",
-                lineColor: !props.lightMode ? "#707073" : "#ccd6eb",
-                minorGridLineColor: !props.lightMode ? "#505053" : "#f2f2f2",
-                tickColor: !props.lightMode ? "#707073" : "#ccd6eb",
-                crosshair: {
-                  snap: false,
-                  label: {
-                    padding: 4,
-                  },
-                },
-                labels: {
-                  align: "right",
-                  x: -3,
-                  style: {
-                    color: !props.lightMode ? "#E0E0E3" : {},
-                  },
-                },
-                title: {
-                  text: "OI Chg",
-                  style: {
-                    color: !props.lightMode ? "#A0A0A3" : {},
-                  },
-                },
-                height: "50%",
-                lineWidth: 1,
-                resize: {
-                  enabled: true,
-                },
-                top: "0%",
-              },
-              {
-                showEmpty: false,
-
-                gridLineColor: !props.lightMode ? "#707073" : {},
-                lineColor: !props.lightMode ? "#707073" : {},
-                minorGridLineColor: !props.lightMode ? "#505053" : {},
-                tickColor: !props.lightMode ? "#707073" : {},
-                crosshair: {
-                  snap: false,
-                  label: {
-                    padding: 4,
-                  },
-                },
-                labels: {
-                  align: "right",
-                  x: -3,
-                  style: {
-                    color: !props.lightMode ? "#E0E0E3" : {},
-                  },
-                },
-                title: {
-                  text: "Vol Chg",
-                  style: {
-                    color: !props.lightMode ? "#A0A0A3" : {},
-                  },
-                },
-                top: "50%",
-                height: "50%",
-                offset: 0,
-                lineWidth: 1,
-              },
-            ]
-          : props.EODSummaryType === "FutYTDVol"
-          ? [
-              {
-                showEmpty: false,
-
-                endOnTick: true,
-                gridLineColor: !props.lightMode ? "#707073" : "#e6e6e6",
-                lineColor: !props.lightMode ? "#707073" : "#ccd6eb",
-                minorGridLineColor: !props.lightMode ? "#505053" : "#f2f2f2",
-                tickColor: !props.lightMode ? "#707073" : "#ccd6eb",
-                crosshair: {
-                  snap: false,
-                  label: {
-                    padding: 4,
-                  },
-                },
-                labels: {
-                  align: "right",
-                  x: -3,
-                  style: {
-                    color: !props.lightMode ? "#E0E0E3" : {},
-                  },
-                },
-                title: {
-                  text: "YTD Vol",
-                  style: {
-                    color: !props.lightMode ? "#A0A0A3" : {},
-                  },
-                },
-                height: "100%",
-                lineWidth: 1,
-                resize: {
-                  enabled: true,
-                },
-                top: "0%",
-              },
-            ]
-          : props.EODSummaryType === "FutYTDADV"
-          ? [
-              {
-                showEmpty: false,
-
-                endOnTick: true,
-                gridLineColor: !props.lightMode ? "#707073" : "#e6e6e6",
-                lineColor: !props.lightMode ? "#707073" : "#ccd6eb",
-                minorGridLineColor: !props.lightMode ? "#505053" : "#f2f2f2",
-                tickColor: !props.lightMode ? "#707073" : "#ccd6eb",
-                crosshair: {
-                  snap: false,
-                  label: {
-                    padding: 4,
-                  },
-                },
-                labels: {
-                  align: "right",
-                  x: -3,
-                  style: {
-                    color: !props.lightMode ? "#E0E0E3" : {},
-                  },
-                },
-                title: {
-                  text: "YTD ADV",
-                  style: {
-                    color: !props.lightMode ? "#A0A0A3" : {},
-                  },
-                },
-                height: "100%",
-                lineWidth: 1,
-                resize: {
-                  enabled: true,
-                },
-                top: "0%",
-              },
-            ]
-          : props.EODSummaryType ===
-            "CallYTDVol, CallYTDADV, CallADV, CallVol, PutYTDVol, PutYTDADV, PutADV, PutVol"
-          ? [
-              {
-                showEmpty: false,
-
-                endOnTick: true,
-                gridLineColor: !props.lightMode ? "#707073" : "#e6e6e6",
-                lineColor: !props.lightMode ? "#707073" : "#ccd6eb",
-                minorGridLineColor: !props.lightMode ? "#505053" : "#f2f2f2",
-                tickColor: !props.lightMode ? "#707073" : "#ccd6eb",
-                crosshair: {
-                  snap: false,
-                  label: {
-                    padding: 4,
-                  },
-                },
-                labels: {
-                  align: "right",
-                  x: -3,
-                  style: {
-                    color: !props.lightMode ? "#E0E0E3" : {},
-                  },
-                },
-                title: {
-                  text: "Call Vol",
-                  style: {
-                    color: !props.lightMode ? "#A0A0A3" : {},
-                  },
-                },
-                height: "35%",
-                lineWidth: 1,
-                resize: {
-                  enabled: true,
-                },
-                top: "0%",
-              },
-              {
-                showEmpty: false,
-
-                gridLineColor: !props.lightMode ? "#707073" : {},
-                lineColor: !props.lightMode ? "#707073" : {},
-                minorGridLineColor: !props.lightMode ? "#505053" : {},
-                tickColor: !props.lightMode ? "#707073" : {},
-                crosshair: {
-                  snap: false,
-                  label: {
-                    padding: 4,
-                  },
-                },
-                labels: {
-                  align: "right",
-                  x: -3,
-                  style: {
-                    color: !props.lightMode ? "#E0E0E3" : {},
-                  },
-                },
-                title: {
-                  text: "Call ADV",
-                  style: {
-                    color: !props.lightMode ? "#A0A0A3" : {},
-                  },
-                },
-                top: "35%",
-                height: "15%",
-                offset: 0,
-                lineWidth: 1,
-              },
-              {
-                showEmpty: false,
-
-                gridLineColor: !props.lightMode ? "#707073" : {},
-                lineColor: !props.lightMode ? "#707073" : {},
-                minorGridLineColor: !props.lightMode ? "#505053" : {},
-                tickColor: !props.lightMode ? "#707073" : {},
-                crosshair: {
-                  snap: false,
-                  label: {
-                    padding: 4,
-                  },
-                },
-                labels: {
-                  align: "right",
-                  x: -3,
-                  style: {
-                    color: !props.lightMode ? "#E0E0E3" : {},
-                  },
-                },
-                title: {
-                  text: "Put Vol",
-                  style: {
-                    color: !props.lightMode ? "#A0A0A3" : {},
-                  },
-                },
-                top: "50%",
-                height: "35%",
-                offset: 0,
-                lineWidth: 1,
-              },
-              {
-                showEmpty: false,
-
-                gridLineColor: !props.lightMode ? "#707073" : {},
-                lineColor: !props.lightMode ? "#707073" : {},
-                minorGridLineColor: !props.lightMode ? "#505053" : {},
-                tickColor: !props.lightMode ? "#707073" : {},
-                crosshair: {
-                  snap: false,
-                  label: {
-                    padding: 4,
-                  },
-                },
-                labels: {
-                  align: "right",
-                  x: -3,
-                  style: {
-                    color: !props.lightMode ? "#E0E0E3" : {},
-                  },
-                },
-                title: {
-                  text: "Put ADV",
-                  style: {
-                    color: !props.lightMode ? "#A0A0A3" : {},
-                  },
-                },
-                top: "85%",
-                height: "15%",
-                offset: 0,
-                lineWidth: 1,
-              },
-            ]
-          : [
-              {
-                showEmpty: false,
-
-                endOnTick: true,
-                gridLineColor: !props.lightMode ? "#707073" : "#e6e6e6",
-                lineColor: !props.lightMode ? "#707073" : "#ccd6eb",
-                minorGridLineColor: !props.lightMode ? "#505053" : "#f2f2f2",
-                tickColor: !props.lightMode ? "#707073" : "#ccd6eb",
-                crosshair: {
-                  snap: false,
-                  label: {
-                    padding: 4,
-                  },
-                },
-                labels: {
-                  align: "right",
-                  x: -3,
-                  style: {
-                    color: !props.lightMode ? "#E0E0E3" : {},
-                  },
-                },
-                title: {
-                  text: "Call Vol",
-                  style: {
-                    color: !props.lightMode ? "#A0A0A3" : {},
-                  },
-                },
-                height: "35%",
-                lineWidth: 1,
-                resize: {
-                  enabled: true,
-                },
-                top: "0%",
-              },
-              {
-                showEmpty: false,
-
-                gridLineColor: !props.lightMode ? "#707073" : {},
-                lineColor: !props.lightMode ? "#707073" : {},
-                minorGridLineColor: !props.lightMode ? "#505053" : {},
-                tickColor: !props.lightMode ? "#707073" : {},
-                crosshair: {
-                  snap: false,
-                  label: {
-                    padding: 4,
-                  },
-                },
-                labels: {
-                  align: "right",
-                  x: -3,
-                  style: {
-                    color: !props.lightMode ? "#E0E0E3" : {},
-                  },
-                },
-                title: {
-                  text: "Call ADV",
-                  style: {
-                    color: !props.lightMode ? "#A0A0A3" : {},
-                  },
-                },
-                top: "35%",
-                height: "15%",
-                offset: 0,
-                lineWidth: 1,
-              },
-              {
-                showEmpty: false,
-
-                gridLineColor: !props.lightMode ? "#707073" : {},
-                lineColor: !props.lightMode ? "#707073" : {},
-                minorGridLineColor: !props.lightMode ? "#505053" : {},
-                tickColor: !props.lightMode ? "#707073" : {},
-                crosshair: {
-                  snap: false,
-                  label: {
-                    padding: 4,
-                  },
-                },
-                labels: {
-                  align: "right",
-                  x: -3,
-                  style: {
-                    color: !props.lightMode ? "#E0E0E3" : {},
-                  },
-                },
-                title: {
-                  text: "Put Vol",
-                  style: {
-                    color: !props.lightMode ? "#A0A0A3" : {},
-                  },
-                },
-                top: "50%",
-                height: "35%",
-                offset: 0,
-                lineWidth: 1,
-              },
-              {
-                showEmpty: false,
-
-                gridLineColor: !props.lightMode ? "#707073" : {},
-                lineColor: !props.lightMode ? "#707073" : {},
-                minorGridLineColor: !props.lightMode ? "#505053" : {},
-                tickColor: !props.lightMode ? "#707073" : {},
-                crosshair: {
-                  snap: false,
-                  label: {
-                    padding: 4,
-                  },
-                },
-                labels: {
-                  align: "right",
-                  x: -3,
-                  style: {
-                    color: !props.lightMode ? "#E0E0E3" : {},
-                  },
-                },
-                title: {
-                  text: "Put ADV",
-                  style: {
-                    color: !props.lightMode ? "#A0A0A3" : {},
-                  },
-                },
-                top: "85%",
-                height: "15%",
-                offset: 0,
-                lineWidth: 1,
-              },
-            ],
-
-      tooltip: {
-        enabled: data.includes("noneAvail") ? false : true,
-
-        shared: true,
-
-        backgroundColor: !props.lightMode
-          ? "rgb(95,95,97,0.75)"
-          : "rgb(255,255,255,0.75)",
-        style: {
-          color: !props.lightMode ? "#F0F0F0" : {},
+        labels: {
+          style: {
+            color: "#707073",
+          },
+          formatter: function () {
+            return Math.abs(this.value);
+          },
         },
-        split: true,
-        shape: "square",
-        borderWidth: 0,
-        shadow: false,
-        padding: 3,
-        useHTML: true,
-        xDateFormat:
-          props.EODSummaryType === "FutYTDVol" ||
-          props.EODSummaryType === "FutYTDADV"
-            ? "%b"
-            : "%m/%Y",
-
-        positioner:
-          props.EODSummaryType === "FutADV & FutOpnInt"
-            ? undefined
-            : props.EODSummaryType === "CallADV, PutADV, FutADV"
-            ? function (width, height, point) {
-                let chart = this.chart;
-                let position;
-                if (point.isHeader) {
-                  position = {
-                    x: Math.max(
-                      chart.plotLeft,
-                      Math.min(
-                        point.plotX + chart.plotLeft - width / 2,
-                        chart.chartWidth - width - chart.marginRight
-                      )
-                    ),
-                    y: point.plotY,
-                  };
-                } else if (
-                  point.series.name === "Call ADV" ||
-                  point.series.name === "Put ADV"
-                ) {
-                  position = {
-                    x: point.series.chart.plotLeft,
-                    y: 0,
-                  };
-                } else if (point.series.name === "Fut ADV") {
-                  position = {
-                    x: point.series.chart.plotLeft,
-                    y: chart.yAxis[1].top - chart.yAxis[1].height + 65,
-                  };
-                } else {
-                  return {
-                    x: Math.max(
-                      chart.plotLeft,
-                      Math.min(
-                        point.plotX + chart.plotLeft - width / 2,
-                        chart.chartWidth - width - chart.marginRight
-                      )
-                    ),
-                    y: point.plotY - height * 1.5,
-                  };
-                }
-                return position;
-              }
-            : props.EODSummaryType ===
-              "CallOpenInt, PutOpenInt, CallVol, PutVol"
-            ? function (width, height, point) {
-                let chart = this.chart;
-                let position;
-                if (point.isHeader) {
-                  position = {
-                    x: Math.max(
-                      chart.plotLeft,
-                      Math.min(
-                        point.plotX + chart.plotLeft - width / 2,
-                        chart.chartWidth - width - chart.marginRight
-                      )
-                    ),
-                    y: point.plotY,
-                  };
-                } else if (
-                  point.series.name === "Call OI" ||
-                  point.series.name === "Put OI"
-                ) {
-                  position = {
-                    x: point.series.chart.plotLeft,
-                    y: 0,
-                  };
-                } else if (
-                  point.series.name === "Call Vol" ||
-                  point.series.name === "Put Vol"
-                ) {
-                  position = {
-                    x: point.series.chart.plotLeft,
-                    y: chart.yAxis[1].top - 50,
-                  };
-                } else {
-                  return {
-                    x: Math.max(
-                      chart.plotLeft,
-                      Math.min(
-                        point.plotX + chart.plotLeft - width / 2,
-                        chart.chartWidth - width - chart.marginRight
-                      )
-                    ),
-                    y: point.plotY - height * 1.5,
-                  };
-                }
-                return position;
-              }
-            : props.EODSummaryType ===
-              "OICallChg, OIPutChg, CallVolChg, PutVolChg"
-            ? function (width, height, point) {
-                let chart = this.chart;
-                let position;
-                if (point.isHeader) {
-                  position = {
-                    x: Math.max(
-                      chart.plotLeft,
-                      Math.min(
-                        point.plotX + chart.plotLeft - width / 2,
-                        chart.chartWidth - width - chart.marginRight
-                      )
-                    ),
-                    y: point.plotY,
-                  };
-                } else if (
-                  point.series.name === "Call OI Chg" ||
-                  point.series.name === "Put OI Chg"
-                ) {
-                  position = {
-                    x: point.series.chart.plotLeft,
-                    y: 0,
-                  };
-                } else if (
-                  point.series.name === "Call Vol Chg" ||
-                  point.series.name === "Put Vol Chg"
-                ) {
-                  position = {
-                    x: point.series.chart.plotLeft,
-                    y: chart.yAxis[1].top - 50,
-                  };
-                } else {
-                  return {
-                    x: Math.max(
-                      chart.plotLeft,
-                      Math.min(
-                        point.plotX + chart.plotLeft - width / 2,
-                        chart.chartWidth - width - chart.marginRight
-                      )
-                    ),
-                    y: point.plotY - height * 1.5,
-                  };
-                }
-                return position;
-              }
-            : props.EODSummaryType === "FutYTDVol"
-            ? undefined
-            : props.EODSummaryType === "FutYTDADV"
-            ? undefined
-            : props.EODSummaryType ===
-              "CallYTDVol, CallYTDADV, CallADV, CallVol, PutYTDVol, PutYTDADV, PutADV, PutVol"
-            ? function (width, height, point) {
-                let chart = this.chart;
-                let position;
-                if (point.isHeader) {
-                  position = {
-                    x: Math.max(
-                      chart.plotLeft,
-                      Math.min(
-                        point.plotX + chart.plotLeft - width / 2,
-                        chart.chartWidth - width - chart.marginRight
-                      )
-                    ),
-                    y: point.plotY,
-                  };
-                } else if (
-                  point.series.name === "Call Vol" ||
-                  point.series.name === "Call YTD Vol"
-                ) {
-                  position = {
-                    x: point.series.chart.plotLeft,
-                    y: 0,
-                  };
-                } else if (
-                  point.series.name === "Call YTD ADV" ||
-                  point.series.name === "Call ADV"
-                ) {
-                  position = {
-                    x: point.series.chart.plotLeft,
-                    y: chart.yAxis[1].top - 50,
-                  };
-                } else if (
-                  point.series.name === "Put Vol" ||
-                  point.series.name === "Put YTD Vol"
-                ) {
-                  position = {
-                    x: point.series.chart.plotLeft,
-                    y: chart.yAxis[2].top - 25,
-                  };
-                } else if (
-                  point.series.name === "Put YTD ADV" ||
-                  point.series.name === "Put ADV"
-                ) {
-                  position = {
-                    x: point.series.chart.plotLeft,
-                    y: chart.yAxis[3].top - 50,
-                  };
-                } else {
-                  return {
-                    x: Math.max(
-                      chart.plotLeft,
-                      Math.min(
-                        point.plotX + chart.plotLeft - width / 2,
-                        chart.chartWidth - width - chart.marginRight
-                      )
-                    ),
-                    y: point.plotY - height * 1.5,
-                  };
-                }
-                return position;
-              }
-            : undefined,
-
-        //   let chart = this.chart;
-        //   let position;
-        //   if (point.isHeader) {
-        //     position = {
-        //       x: Math.max(
-        //         chart.plotLeft,
-        //         Math.min(
-        //           point.plotX + chart.plotLeft - width / 2,
-        //           chart.chartWidth - width - chart.marginRight
-        //         )
-        //       ),
-        //       y: point.plotY,
-        //     };
-        //   } else if (
-        //     point.series.name === "Future Volume" ||
-        //     point.series.name === "Future Volume Chg" ||
-        //     point.series.name === "Call Volume" ||
-        //     point.series.name === "Put Volume" ||
-        //     point.series.name === "Call Volume Chg" ||
-        //     point.series.name === "Put Volume Chg"
-        //   ) {
-        //     position = {
-        //       x: point.series.chart.plotLeft,
-        //       y: 0,
-        //     };
-        //   } else if (
-        //     point.series.name === "Future OI" ||
-        //     point.series.name === "Future OI Chg" ||
-        //     point.series.name === "Call OI" ||
-        //     point.series.name === "Put OI" ||
-        //     point.series.name === "Call OI Chg" ||
-        //     point.series.name === "Put OI Chg"
-        //   ) {
-        //     position = {
-        //       x: point.series.chart.plotLeft,
-        //       y: chart.yAxis[2].top - chart.yAxis[2].height + 48,
-        //     };
-        //   } else {
-        //     return {
-        //       x: Math.max(
-        //         chart.plotLeft,
-        //         Math.min(
-        //           point.plotX + chart.plotLeft - width / 2,
-        //           chart.chartWidth - width - chart.marginRight
-        //         )
-        //       ),
-        //       y: point.plotY - height * 1.5,
-        //     };
-        //   }
-
-        //   return position;
-        // },
+        accessibility: {
+          description: "Price",
+        },
       },
-      // corresponding indexes in data array:
-      // lM,
-      // YR,
-      // FutVol, 2
-      // FutVolChg, 3
-      // FutADV,4
-      // FutOpnInt,5
-      // OIFutChg,6
-      // CallOpenInt7
-      // ,PutOpenInt,8
-      // OICallChg,9
-      // OIPutChg,10
-      // CallVolChg,11
-      // PutVolChg,12
-      // CallVol,13
-      // CallADV,14
-      // PutVol 15
-      // ,PutADV,16
-      // TotVol,17
-      // TotADV,18
-      // FutYTDVol 19
-      // ,FutYTDADV,20
-      // CallYTDVol 21
-      // ,CallYTDADV,22
-      // PutYTDVol 23
-      // ,PutYTDADV 24
 
-      series:
-        props.EODSummaryType === "FutADV & FutOpnInt"
-          ? [
-              {
-                type: "column",
-                name: "Future ADV",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][5]])
-                  : [0, 0, 0, 0, 0],
-
-                color: props.lightMode ? undefined : "#4a68b5",
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.5",
-                borderRadius: props.lightMode ? "0" : "1",
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-
-              {
-                type: "column",
-                name: "Future OI",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][1]])
-                  : [0, 0, 0, 0, 0],
-                yAxis: 1,
-
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.1",
-                borderRadius: props.lightMode ? "0" : "1",
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-            ]
-          : props.EODSummaryType === "CallADV, PutADV, FutADV"
-          ? [
-              {
-                type: "column",
-                name: "Call ADV",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][15]])
-                  : [0, 0, 0, 0, 0],
-                color: "#7A9FCC",
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.5",
-                borderRadius: props.lightMode ? "0" : "1",
-                yAxis: 0,
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-              {
-                type: "column",
-                name: "Put ADV",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][17]])
-                  : [0, 0, 0, 0, 0],
-                color: "#A6861E",
-                yAxis: 0,
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.5",
-                borderRadius: props.lightMode ? "0" : "1",
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-              {
-                type: "column",
-                name: "Fut ADV",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][5]])
-                  : [0, 0, 0, 0, 0],
-                color: "#4E5A85",
-                borderColor: "white",
-                borderWidth: "0.5",
-                yAxis: 1,
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-            ]
-          : props.EODSummaryType === "CallOpenInt, PutOpenInt, CallVol, PutVol"
-          ? [
-              {
-                type: "column",
-                name: "Call OI",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][8]])
-                  : [0, 0, 0, 0, 0],
-                color: "#7A9FCC",
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.5",
-                borderRadius: props.lightMode ? "0" : "1",
-                yAxis: 0,
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-              {
-                type: "column",
-                name: "Put OI",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][9]])
-                  : [0, 0, 0, 0, 0],
-                color: "#A48308",
-                yAxis: 0,
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.5",
-                borderRadius: props.lightMode ? "0" : "1",
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-              {
-                type: "column",
-                name: "Call Vol",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][14]])
-                  : [0, 0, 0, 0, 0],
-                color: "rgb(137,188,233)",
-                borderColor: "white",
-                borderWidth: "0.5",
-                yAxis: 1,
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-              {
-                type: "column",
-                name: "Put Vol",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][16]])
-                  : [0, 0, 0, 0, 0],
-                yAxis: 1,
-
-                color: "#A6861E",
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.5",
-                borderRadius: props.lightMode ? "0" : "1",
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-            ]
-          : props.EODSummaryType ===
-            "OICallChg, OIPutChg, CallVolChg, PutVolChg"
-          ? [
-              {
-                type: "line",
-                name: "Call OI Chg",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][10]])
-                  : [0, 0, 0, 0, 0],
-                color: "rgb(137,188,233)",
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.5",
-                borderRadius: props.lightMode ? "0" : "1",
-                yAxis: 0,
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-              {
-                type: "line",
-                name: "Put OI Chg",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][11]])
-                  : [0, 0, 0, 0, 0],
-                color: "#A48308",
-                yAxis: 0,
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.5",
-                borderRadius: props.lightMode ? "0" : "1",
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-              {
-                type: "line",
-                name: "Call Vol Chg",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][12]])
-                  : [0, 0, 0, 0, 0],
-                color: "rgb(137,188,233)",
-                borderColor: "white",
-                borderWidth: "0.5",
-                yAxis: 1,
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-              {
-                type: "line",
-                name: "Put Vol Chg",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][13]])
-                  : [0, 0, 0, 0, 0],
-                yAxis: 1,
-
-                color: "#A6861E",
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.5",
-                borderRadius: props.lightMode ? "0" : "1",
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-            ]
-          : props.EODSummaryType === "FutYTDVol"
-          ? data
-              .reduce((result, month, i) => {
-                if (i === 0) {
-                  result.push([]);
-                  result[result.length - 1].push(month);
-                } else if (
-                  new Date(month[0]).toString().slice(11, 15) !==
-                  new Date(data[i - 1][0]).toString().slice(11, 15)
-                ) {
-                  //comparing years to determine series groupings
-                  result.push([]);
-                  result[result.length - 1].push(month);
-                } else {
-                  result[result.length - 1].push(month);
-                }
-                return result;
-              }, [])
-              .map((year, i) => {
-                return {
-                  type: "line",
-                  name: `${new Date(year[0][0])
-                    .toString()
-                    .slice(11, 15)} YTD Vol`,
-                  data: year.map((month, i) => {
-                    const xDate = new Date(month[0]);
-                    xDate.setFullYear(1970);
-                    return [Date.parse(xDate), month[6]];
-                  }),
-                  yAxis: 0,
-                  marker: {
-                    enabled: true,
-                    radius: 2,
-                  },
-                  color: `hsl(${
-                    210 + i * 20 < 360
-                      ? 210 + i * 20
-                      : 210 + i * 20 > 360
-                      ? 210 - i * 20
-                      : 200
-                  }, 72%, ${
-                    210 + i * 20 < 360 || 210 + i * 20 > 360 ? 57 - i * 3 : 57
-                  }%`,
-                  borderColor: "white",
-                  borderWidth: props.lightMode ? undefined : "0.5",
-                  borderRadius: props.lightMode ? "0" : "1",
-                  dataGrouping: {
-                    enabled: groupingUnits,
-                  },
-                };
-              })
-          : props.EODSummaryType === "FutYTDADV"
-          ? data
-              .reduce((result, month, i) => {
-                if (i === 0) {
-                  result.push([]);
-                  result[result.length - 1].push(month);
-                } else if (
-                  new Date(month[0]).toString().slice(11, 15) !==
-                  new Date(data[i - 1][0]).toString().slice(11, 15)
-                ) {
-                  //comparing years to determine series groupings
-                  result.push([]);
-                  result[result.length - 1].push(month);
-                } else {
-                  result[result.length - 1].push(month);
-                }
-                return result;
-              }, [])
-              .map((year, i) => {
-                return {
-                  type: "line",
-                  name: `${new Date(year[0][0])
-                    .toString()
-                    .slice(11, 15)} YTD ADV`,
-                  data: year.map((month, i) => {
-                    const xDate = new Date(month[0]);
-                    xDate.setFullYear(1970);
-                    return [Date.parse(xDate), month[7]];
-                  }),
-                  yAxis: 0,
-                  marker: {
-                    enabled: true,
-                    radius: 2,
-                  },
-                  color: `hsl(${
-                    210 + i * 20 < 360
-                      ? 210 + i * 20
-                      : 210 + i * 20 > 360
-                      ? 210 - i * 20
-                      : 200
-                  }, 72%, ${
-                    210 + i * 20 < 360 || 210 + i * 20 > 360 ? 57 - i * 3 : 57
-                  }%`,
-                  borderColor: "white",
-                  borderWidth: props.lightMode ? undefined : "0.5",
-                  borderRadius: props.lightMode ? "0" : "1",
-                  dataGrouping: {
-                    enabled: groupingUnits,
-                  },
-                };
-              })
-          : props.EODSummaryType ===
-            "CallYTDVol, CallYTDADV, CallADV, CallVol, PutYTDVol, PutYTDADV, PutADV, PutVol"
-          ? [
-              {
-                type: "column",
-                name: "Call Vol",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][14]])
-                  : [0, 0, 0, 0, 0],
-                color: "rgb(137,188,233)",
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.5",
-                borderRadius: props.lightMode ? "0" : "1",
-                yAxis: 0,
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-              {
-                type: "column",
-                name: "Call YTD Vol",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][18]])
-                  : [0, 0, 0, 0, 0],
-                color: "#5B81CC",
-                yAxis: 0,
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.5",
-                borderRadius: props.lightMode ? "0" : "1",
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-              {
-                type: "spline",
-                name: "Call ADV",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][15]])
-                  : [0, 0, 0, 0, 0],
-                yAxis: 1,
-
-                color: "#8F213B",
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.5",
-                borderRadius: props.lightMode ? "0" : "1",
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-              {
-                type: "spline",
-                name: "Call YTD ADV",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][19]])
-                  : [0, 0, 0, 0, 0],
-                color: "#525DA3",
-                borderColor: "white",
-                borderWidth: "0.5",
-                yAxis: 1,
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-
-              {
-                type: "column",
-                name: "Put Vol",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][16]])
-                  : [0, 0, 0, 0, 0],
-                color: "#E8BC57",
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.5",
-                borderRadius: props.lightMode ? "0" : "1",
-                yAxis: 2,
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-              {
-                type: "column",
-                name: "Put YTD Vol",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][20]])
-                  : [0, 0, 0, 0, 0],
-                color: "#997C1C",
-                yAxis: 2,
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.5",
-                borderRadius: props.lightMode ? "0" : "1",
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-              {
-                type: "spline",
-                name: "Put ADV",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][17]])
-                  : [0, 0, 0, 0, 0],
-                color: "#8F213B",
-
-                borderColor: "white",
-                borderWidth: "0.5",
-                yAxis: 3,
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-              {
-                type: "spline",
-                name: "Put YTD ADV",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][21]])
-                  : [0, 0, 0, 0, 0],
-                yAxis: 3,
-                color: "#525DA3",
-
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.5",
-                borderRadius: props.lightMode ? "0" : "1",
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-            ]
-          : [
-              {
-                type: "column",
-                name: "Call Vol",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][14]])
-                  : [0, 0, 0, 0, 0],
-                color: "rgb(137,188,233)",
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.5",
-                borderRadius: props.lightMode ? "0" : "1",
-                yAxis: 0,
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-              {
-                type: "column",
-                name: "Call YTD Vol",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][18]])
-                  : [0, 0, 0, 0, 0],
-                color: "#5B81CC",
-                yAxis: 0,
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.5",
-                borderRadius: props.lightMode ? "0" : "1",
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-              {
-                type: "spline",
-                name: "Call ADV",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][15]])
-                  : [0, 0, 0, 0, 0],
-                yAxis: 1,
-
-                color: "#8F213B",
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.5",
-                borderRadius: props.lightMode ? "0" : "1",
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-              {
-                type: "spline",
-                name: "Call YTD ADV",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][19]])
-                  : [0, 0, 0, 0, 0],
-                color: "#525DA3",
-                borderColor: "white",
-                borderWidth: "0.5",
-                yAxis: 1,
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-
-              {
-                type: "column",
-                name: "Put Vol",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][16]])
-                  : [0, 0, 0, 0, 0],
-                color: "#E8BC57",
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.5",
-                borderRadius: props.lightMode ? "0" : "1",
-                yAxis: 2,
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-              {
-                type: "column",
-                name: "Put YTD Vol",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][20]])
-                  : [0, 0, 0, 0, 0],
-                color: "#997C1C",
-                yAxis: 2,
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.5",
-                borderRadius: props.lightMode ? "0" : "1",
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-              {
-                type: "spline",
-                name: "Put ADV",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][17]])
-                  : [0, 0, 0, 0, 0],
-                color: "#8F213B",
-
-                borderColor: "white",
-                borderWidth: "0.5",
-                yAxis: 3,
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-              {
-                type: "spline",
-                name: "Put YTD ADV",
-                data: !data.includes("noneAvail")
-                  ? data.map((d, i) => [data[i][0], data[i][21]])
-                  : [0, 0, 0, 0, 0],
-                yAxis: 3,
-                color: "#525DA3",
-
-                borderColor: "white",
-                borderWidth: props.lightMode ? undefined : "0.5",
-                borderRadius: props.lightMode ? "0" : "1",
-                dataGrouping: {
-                  enabled: groupingUnits,
-                },
-              },
-            ],
+      series: [
+        {
+          name: "Call",
+          data: callData,
+          type: "bar",
+        },
+        {
+          name: "Put",
+          data: putData,
+          type: "bar",
+        },
+      ],
       exporting: {
         buttons: {
           contextButton: {
@@ -2112,145 +606,74 @@ const EODSummaryGraph = (props) => {
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [options, data, chartRef.current, isMobile]);
+  }, [options, callData, chartRef.current, isMobile]);
 
   useEffect(() => {
-    setData([]);
+    setCallData([]);
+    setPutData([]);
+
     try {
       loadSpinnerRef.current.style.animationFillMode = "forwards";
       loadSpinnerRef.current.style.visibility = "visible";
       loadSpinnerRef.current.style.opacity = "1";
-      containerRef.current.style.opacity = data.includes("noneAvail")
+      containerRef.current.style.opacity = callData.includes("noneAvail")
         ? "0.6"
         : "0.9";
     } catch {}
 
     axios(
-      process.env.NODE_ENV === "production"
-        ? `https://quikoptions.info/api/EODSummaryData?EODSummaryDataProdSym=${sym}`
-        : `https://quikoptions.info/api/EODSummaryData?EODSummaryDataProdSym=${sym}`
+      //   `https://quikoptions.info/api/straddles?straddleSym=${sym}`
+      `https://quikoptions.info/api/eventConData?eventConDataProdSym=${sym}`
     ).then((response) => {
       console.log(response.data);
 
       try {
-        containerRef.current.style.opacity = data.includes("noneAvail")
+        containerRef.current.style.opacity = callData.includes("noneAvail")
           ? "0.6"
           : "1";
 
         loadSpinnerRef.current.style.visibility = "hidden";
         loadSpinnerRef.current.style.opacity = "0";
 
-        if (response.data.includes("AVAIL") || response.data.length === 0) {
-          console.log("!");
-          setTimeout(() => setData([0, "noneAvail"]), 0);
-          noneAvailRef.current.style.animationFillMode = "forwards";
-          noneAvailRef.current.style.visibility = "visible";
-          noneAvailRef.current.style.opacity = "0.75";
-          containerRef.current.style.opacity = "0.6";
-        } else {
-          try {
-            containerRef.current.style.opacity = "0.9";
-          } catch {}
+        console.log("!!");
 
-          setData(
-            response.data.map(
-              ({
-                YM,
-                FutOpnInt,
-                OIFutChg,
-                FutVolChg,
-                FutVol,
-                FutADV,
-                FutYTDVol,
-                FutYTDADV,
-                CallOpenInt,
-                PutOpenInt,
-                OICallChg,
-                OIPutChg,
-                CallVolChg,
-                PutVolChg,
-                CallVol,
-                CallADV,
-                PutVol,
-                PutADV,
-                CallYTDVol,
-                CallYTDADV,
-                PutYTDVol,
-                PutYTDADV,
-              }) => [
-                Date.parse(`${YM.slice(-2)}/01/${YM.slice(0, 4)}`),
-                FutOpnInt === "NaN" || isNaN(FutOpnInt)
-                  ? null
-                  : parseFloat(FutOpnInt),
-                OIFutChg === "NaN" || isNaN(OIFutChg)
-                  ? null
-                  : parseFloat(OIFutChg),
-                FutVolChg === "NaN" || isNaN(FutVolChg)
-                  ? null
-                  : parseFloat(FutVolChg),
-                FutVol === "NaN" || isNaN(FutVol) ? null : parseFloat(FutVol),
-                FutADV === "NaN" || isNaN(FutADV) ? null : parseFloat(FutADV), //cv5
-                FutYTDVol === "NaN" || isNaN(FutYTDVol)
-                  ? null
-                  : parseFloat(FutYTDVol), //pv6
-                FutYTDADV === "NaN" || isNaN(FutYTDADV) //cvc7
-                  ? null
-                  : parseFloat(FutYTDADV),
-                CallOpenInt === "NaN" || isNaN(CallOpenInt) //pvc8
-                  ? null
-                  : parseFloat(CallOpenInt),
-                PutOpenInt === "NaN" || isNaN(PutOpenInt)
-                  ? null
-                  : parseFloat(PutOpenInt), //coi9
-                OICallChg === "NaN" || isNaN(OICallChg)
-                  ? null
-                  : parseFloat(OICallChg), //poi10
-                OIPutChg === "NaN" || isNaN(OIPutChg) //coic11
-                  ? null
-                  : parseFloat(OIPutChg),
-                CallVolChg === "NaN" || isNaN(CallVolChg) //poic12
-                  ? null
-                  : parseFloat(CallVolChg),
-                PutVolChg === "NaN" || isNaN(PutVolChg) //poic12
-                  ? null
-                  : parseFloat(PutVolChg),
-                CallVol === "NaN" || isNaN(CallVol) //poic12
-                  ? null
-                  : parseFloat(CallVol),
-                CallADV === "NaN" || isNaN(CallADV) //poic12
-                  ? null
-                  : parseFloat(CallADV),
-                PutVol === "NaN" || isNaN(PutVol) //poic12
-                  ? null
-                  : parseFloat(PutVol),
-                PutADV === "NaN" || isNaN(PutADV) //poic12
-                  ? null
-                  : parseFloat(PutADV),
-                CallYTDVol === "NaN" || isNaN(CallYTDVol) //poic12
-                  ? null
-                  : parseFloat(CallYTDVol),
-                CallYTDADV === "NaN" || isNaN(CallYTDADV) //poic12
-                  ? null
-                  : parseFloat(CallYTDADV),
-                PutYTDVol === "NaN" || isNaN(PutYTDVol) //poic12
-                  ? null
-                  : parseFloat(PutYTDVol),
-                PutYTDADV === "NaN" || isNaN(PutYTDADV) //poic12
-                  ? null
-                  : parseFloat(PutYTDADV),
-                // OpnInt === "NaN" || isNaN(OpnInt) ? null : parseFloat(OpnInt),
-                // Volume === "NaN" || isNaN(Volume) ? null : parseFloat(Volume),
-              ]
-            )
+        if (response.data.Symbol === undefined) {
+          setCallData("noneAvail");
+        } else {
+          //   setCategories(response.data.map((strike) => strike.StrikePrice));
+          //   setCallData(response.data.map((strike) => strike.CallPrice * -1));
+          //   setPutData(response.data.map((strike) => strike.PutPrice));
+
+          setCategories(
+            response.data.Futures[0].Expirations[0].Strikes.filter(
+              (strike) => strike.Call.Mid !== null && strike.Put.Mid !== null
+            ).map((strike) => strike.StrikePrice)
+          );
+          setCallData(
+            response.data.Futures[0].Expirations[0].Strikes.filter(
+              (strike) => strike.Call.Mid !== null && strike.Put.Mid !== null
+            ).map((strike) => strike.Call.Mid * -1)
+          );
+          setPutData(
+            response.data.Futures[0].Expirations[0].Strikes.filter(
+              (strike) => strike.Call.Mid !== null && strike.Put.Mid !== null
+            ).map((strike) => strike.Put.Mid)
           );
         }
-        setGroupingUnits([
-          [
-            "week", // unit name
-            [1], // allowed multiples
-          ],
-          ["month", [1, 2, 3, 4, 6]],
-        ]);
+        console.log(
+          response.data.Futures[0].Expirations[0].Strikes.map(
+            (strike) => strike.Put.Last
+          ),
+          response.data.Futures[0].Expirations[0].Strikes.map(
+            (strike) => strike.Call.Last
+          ),
+          response.data.Futures[0].Expirations[0].Strikes.map(
+            (strike) => strike.StrikePrice
+          )
+        );
+
+        //   calldata = [];
+
         console.log("Setdata");
         setOptions();
       } catch {
@@ -2267,152 +690,66 @@ const EODSummaryGraph = (props) => {
   }, [props.prodName]);
 
   return (
-    <div style={{ background: !props.lightMode && "rgb(47,54.5,70.5)" }}>
-      {props.symSwitchEnabled ? (
-        <div
-          style={{
-            // position: "absolute",
-            right: "0%",
-            // transform: "translate(0,-100%)",
-            zIndex: "2",
-            fontSize: "0.9em",
-            color: "white",
-            textAlign: "center",
-            width: "100%",
-
-            // window.innerWidth < 1500 ? "1390px" : window.innerWidth - 50,
-            whiteSpace: "nowrap",
-            overflow: "visible",
-            // right:"100%",
-            display: "inline-flex",
-          }}
-        >
-          <span
-            style={{
-              fontSize: "9px",
-              marginLeft: "0.5rem",
-              marginRight: "0.5rem",
-              marginBottom: "0",
-              padding: "0",
-              height: "fit-content",
-              transform: "translate(0px,0.2rem)",
-              borderRadius: "2px",
-              background: "blue",
-              textAlign: "center",
-              display: props.symButtonStripLabel === undefined && "none",
-              backgroundColor: props.lightMode ? "" : "rgba(99, 111, 135,0.8)",
-              color: props.lightMode ? "black" : "white",
-            }}
-          >
-            <>&nbsp;</>
-            {`${props.symButtonStripLabel} Symbols:`}
-            <>&nbsp;</>
-          </span>
-          <div
-            className="expButtons"
-            id="expButtons"
-            style={{
-              marginLeft: "auto",
-              scrollbarWidth: "none",
-              // background: `linear-gradient(to right, transparent 29vw, ${
-              //   props.lightMode
-              //     ? "rgb(255, 255, 255)"
-              //     : "rgba(255,255,255,0.4)"
-              // })`,
-              overflow: "scroll",
-              width: "100%",
-              textAlign: "right",
-            }}
-          >
-            <div
-              ref={expButtonsRef}
-              className="expButtons"
-              id="expButtons"
-              style={{
-                scrollBehavior: "smooth",
-                scrollbarWidth: "none",
-                marginLeft: "auto",
-                background: `linear-gradient(to right, transparent 95%, ${
-                  props.lightMode
-                    ? "rgb(255, 255, 255)"
-                    : "rgba(255,255,255,0.4)"
-                })`,
-                overflow: "scroll",
-                width: "100%",
-                textAlign: "left",
-              }}
-            >
-              {/* <ExpiryFutSymbolButton
-                lightMode={props.lightMode}
-                onClick={undefined}
-                expSymbol={props.prodCode}
-                currentlySelected={true}
-              /> */}
-              {props.marketData
-                .filter((symDetails) => symDetails.ProdName !== props.prodName)
-                .map((symDetails) => {
-                  // console.log(symDetails);
-                  return (
-                    // <ExpiryFutSymbolButton
-                    //   lightMode={props.lightMode}
-                    //   onClick={() => {
-                    //     props.setGraphProps({
-                    //       EODSummaryProdName: symDetails.ProdName,
-                    //       EODSummaryProdCode: ProdNameToSym(
-                    //         symDetails.ProdName,
-                    //         false,
-                    //         true
-                    //       ),
-                    //       // symDetails.ProdName.substring(
-
-                    //       //   symDetails.ProdName.indexOf("(") + 1,
-                    //       //   symDetails.ProdName.indexOf(")")
-                    //       // )
-                    //       EODSummaryType: props.EODSummaryType,
-                    //     });
-                    //   }}
-                    //   expSymbol={
-                    //     ProdNameToSym(symDetails.ProdName, false, true)
-                    //     // symDetails.ProdName.split("(")[1].substring(
-                    //     // 0,
-                    //     // symDetails.ProdName.split("(")[1].indexOf(")")
-                    //     // )
-                    //   }
-                    // />
-                    <></>
-                  );
-                })}
-            </div>
-          </div>
-        </div>
-      ) : (
-        <></>
-      )}
-      {data.includes("noneAvail") ? (
+    <div style={{ width: `${width}px`, height: `${width}px` }}>
+      {/* <img
+        src={QSIcon}
+        style={{
+          pointerEvents: "none",
+          position: "fixed",
+          zIndex: "200",
+          width: `${Math.max(Math.min(width * height * 0.0005, 100), 55)}px`,
+          height: `${Math.max(Math.min(width * height * 0.0005, 100), 55)}px`,
+          left: `${
+            width - Math.max(Math.min(width * height * 0.0005, 100), 55) * 1.45
+          }px`,
+          top: "25px",
+          transform: `translate(-10%, -10%)`,
+          webkitTransform: `translate(-10%, -10%)`,
+        }}
+      ></img> */}
+      {callData.includes("noneAvail") ? (
         <div
           ref={noneAvailRef}
           style={{
             transition: "all 0.25s ease",
             position: "absolute",
-            fontSize: "1vw",
-            left: "45%",
-            bottom: "50%",
+            // fontSize: "1vw",
+            // left: "45%",
+            // bottom: "50%",
+            width: `${width}px`,
+            height: `${height}px`,
             zIndex: "100",
-            transform: "scale(3.5,3.5)",
-            display: "table-row-group",
 
-            color: props.lightMode ? "black" : "rgba(176, 192, 209,0.3)",
+            color: "rgba(176, 192, 209,0.3)",
           }}
         >
           <div
             style={{
-              transform: "translate(112.5%,-40%) scale(2.5,2.5)",
+              position: "absolute",
+
+              width: `${width}px`,
+              height: `${height}px`,
+              //   transform: "translate(112.5%,-40%) scale(2.5,2.5)",
               opacity: "0.55",
             }}
           >
-            <ExclamationTriangle sz="lg" />
+            <div
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: `translate(-50%, -50%) scale(${
+                  (0.005 * `${width}`, 0.005 * `${width}`)
+                })`,
+                webkitTransform: `translate(-50%, -50%) scale(${
+                  (0.005 * `${width}`, 0.005 * `${width}`)
+                })`,
+              }}
+            >
+              <ExclamationTriangle sz="lg" />
+              Plot Unavailable
+            </div>
           </div>
-          Plot Unavailable
         </div>
       ) : (
         <>
@@ -2421,10 +758,12 @@ const EODSummaryGraph = (props) => {
             style={{
               transition: "all 0.25s ease",
               position: "absolute",
-              left: "50%",
-              bottom: "50%",
+              //   left: "50%",
+              //   bottom: "50%",
+              width: `${width}px`,
+              height: `${height}px`,
               zIndex: "100",
-              transform: "scale(3.5,3.5)",
+              //   transform: "scale(3.5,3.5)",
             }}
           >
             <Spinner

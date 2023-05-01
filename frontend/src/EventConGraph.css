@@ -1,5 +1,9 @@
 @import "https://code.highcharts.com/css/stocktools/gui.css";
 @import "https://code.highcharts.com/css/annotations/popup.css";
+.noLabel text {
+    fill: red;
+    font-weight: normal;
+}
 
 .chart:-webkit-full-screen {
   width: 100%;
@@ -30,10 +34,10 @@
   position: relative;
   width: 100%;
 }
-svg > g.highcharts-annotation > g.highcharts-annotation-labels > g > text{
+/* svg > g.highcharts-annotation > g.highcharts-annotation-labels > g > text{
     color:slategrey!important;
     fill: slategrey !important;
-}
+} */
 .highcharts-draw-mode {
   cursor: crosshair;
 }
