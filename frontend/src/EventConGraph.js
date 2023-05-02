@@ -41,6 +41,7 @@ const EODSummaryGraph = (props) => {
   const [categories, setCategories] = useState([[0, 0, 0, 0, 0, 0]]);
   const [callData, setCallData] = useState([[0, 0, 0, 0, 0, 0]]);
   const [putData, setPutData] = useState([[0, 0, 0, 0, 0, 0]]);
+  const [allData, setAllData] = useState([[0, 0, 0, 0, 0, 0]]);
 
   const [options, setOptions] = useState();
 
@@ -49,12 +50,6 @@ const EODSummaryGraph = (props) => {
 
   //SET HIGHCHARTS OPTIONS
   useEffect(() => {
-    console.log(
-      searchParams.get("sym"),
-      width,
-      height,
-      searchParams.toString()
-    );
     try {
       if (callData.includes("noneAvail"))
         containerRef.current.style.opacity = "0.6";
@@ -69,8 +64,8 @@ const EODSummaryGraph = (props) => {
     chartRef.current = Highcharts.chart(containerRef.current, {
       chartType: "bar",
       colors: [
-        "#B99840",
-
+        "rgb(204,168,71,0.9)",
+        "#AD3236",
         "#942B36",
         "#024E73",
 
@@ -80,15 +75,16 @@ const EODSummaryGraph = (props) => {
         "#B3701E",
         "#42B39A",
         "#02757D",
+        "#46947a",
         "#024E73",
         "#B3431E",
         "#f39c12",
       ],
       chart: {
         width: width,
-        height: height,
+        height: height - 31,
 
-        marginBottom: 70,
+        marginBottom: 50,
         backgroundColor: {
           linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
           stops: [
@@ -102,62 +98,159 @@ const EODSummaryGraph = (props) => {
         // height: 550,
         events: {
           redraw() {
-            console.log("gg", this.yAxis[0].getExtremes());
-            this.addAnnotation({
-              labelOptions: {
-                overflow: "allow",
-                y: -10,
-                shape: "rect",
-                borderColor: "transparent",
-                backgroundColor: "transparent",
+            var lowPlotLineValue = 0,
+              midPlotLineValue = 0,
+              highPlotLineValue = 0;
 
-                // color: "red",
-                // className: "noLabel",
-                style: {
-                  //   color: "red",
-                  fontSize: `${Math.min(
-                    Math.max(12, (width / 100) * 1.9),
-                    17
-                  )}pt`,
-                },
-              },
-              shapeOptions: {
-                type: "circle",
-                r: 4,
-                strokeWidth: 0,
-              },
-              labels: [
-                {
-                  text: "No",
-                  align: "center",
-                  point: {
-                    y: this.yAxis[0].getExtremes().max / 2,
-                    x: -0.3,
-                    yAxis: 0,
-                    xAxis: 0,
-                  },
-                  style: {
-                    color: "red",
-                  },
-                },
-                {
-                  text: "Yes",
-                  align: "center",
+            for (let i = 0; i < categories.length - 1; i++) {
+              //find low plotline value
+              if (
+                categories[i + 1] > allData.Futures[0].Low &&
+                lowPlotLineValue === 0
+              ) {
+                lowPlotLineValue =
+                  i +
+                  (allData.Futures[0].Low - categories[i]) /
+                    (categories[i + 1] - categories[i]);
+              }
+              //find mid plotline value
+              if (
+                categories[i + 1] > allData.Futures[0].Mid &&
+                midPlotLineValue === 0
+              ) {
+                midPlotLineValue =
+                  i +
+                  (allData.Futures[0].Mid - categories[i]) /
+                    (categories[i + 1] - categories[i]);
+              }
+              //find high plotline value
+              if (
+                categories[i + 1] > allData.Futures[0].High &&
+                highPlotLineValue === 0
+              ) {
+                highPlotLineValue =
+                  i +
+                  (allData.Futures[0].High - categories[i]) /
+                    (categories[i + 1] - categories[i]);
+              }
+              if (
+                lowPlotLineValue !== 0 &&
+                midPlotLineValue !== 0 &&
+                highPlotLineValue !== 0
+              ) {
+                break;
+              }
+            }
 
-                  point: {
-                    y: -this.yAxis[0].getExtremes().max / 2,
-                    x: -0.3,
-                    yAxis: 0,
-                    xAxis: 0,
-                  },
-                  style: {
-                    color: "green",
-                  },
-                },
-              ],
-              draggable: "",
-              crop: false,
+            ///////////////////////
+            //////Add Plot Lines///
+            ///////////////////////
+            this.xAxis[0].addPlotLine({
+              color: "#1E7B7A",
+              dashStyle: "ShortDash",
+              value: lowPlotLineValue,
+              width: 2.5,
+              id: "low",
             });
+            this.xAxis[0].addPlotLine({
+              color: "rgba(215,193,136,0.5)",
+
+              value: midPlotLineValue,
+              width: 3,
+              id: "mid",
+            });
+            this.xAxis[0].addPlotLine({
+              color: "#007BB5",
+              dashStyle: "ShortDash",
+
+              value: highPlotLineValue,
+              width: 2.5,
+              id: "high",
+            });
+
+            ///////////////////////
+            ///YES and NO Labels///
+            ///////////////////////
+            if (width >= 370) {
+              this.addAnnotation({
+                labelOptions: {
+                  overflow: "allow",
+                  y: -10,
+                  shape: "rect",
+                  borderColor: "transparent",
+                  backgroundColor: "rgba(70,127,202,0.2)",
+                  style: {
+                    fontSize: `${Math.min(
+                      Math.max(10.5, (width / 100) * 1.9),
+                      14
+                    )}pt`,
+                  },
+                },
+                shapeOptions: {
+                  type: "circle",
+                  r: 4,
+                  strokeWidth: 0,
+                },
+                labels: [
+                  {
+                    text: "No",
+                    align: "center",
+                    point: {
+                      y: this.yAxis[0].getExtremes().max / 2,
+                      x: -0.3,
+                      yAxis: 0,
+                      xAxis: 0,
+                    },
+                    style: {
+                      color: "#D51625",
+                      fontWeight: "800",
+                    },
+                  },
+                  {
+                    text: "Yes",
+                    align: "center",
+
+                    point: {
+                      y: -this.yAxis[0].getExtremes().max / 2,
+                      x: -0.3,
+                      yAxis: 0,
+                      xAxis: 0,
+                    },
+                    style: {
+                      color: "#459E54",
+                      paintOrder: "stroke",
+                      stroke: "#000000",
+                      strokeWidth: "0.5px",
+                      // strokeLinecap: "butt",
+                      // strokeLinejoin: "miter",
+                      fontWeight: "800",
+                    },
+                  },
+                ],
+                shapes: [
+                  {
+                    point: {
+                      y: 20,
+                      x: lowPlotLineValue,
+                      yAxis: 0,
+                      xAxis: 0,
+                    },
+                    fill: "rgb(0,111,255,0.5)",
+                  },
+                  {
+                    point: {
+                      y: -20,
+                      x: highPlotLineValue,
+                      yAxis: 0,
+                      xAxis: 0,
+                    },
+                    fill: "blue",
+                  },
+                ],
+                draggable: "",
+                crop: false,
+              });
+            }
           },
           render: function () {
             const chart = this,
@@ -186,7 +279,6 @@ const EODSummaryGraph = (props) => {
 
             // Create groups
             chart.customImgGroup = renderer.g("customImgGroup").add();
-            console.log(chart);
             // Render texts
             chart.renderer
               .image(QSIcon, chart.plotBox.width, 20, 50, 50)
@@ -200,94 +292,19 @@ const EODSummaryGraph = (props) => {
           },
         },
       },
-      //   annotations: [
-      //     {
-      //       labelOptions: {
-      //         overflow: "allow",
-      //         y: -10,
-      //         shape: "rect",
-      //         borderColor: "transparent",
-      //         backgroundColor: "transparent",
-      //         style: {
-      //           fontSize: "11pt",
-      //         },
-      //       },
-      //       shapeOptions: {
-      //         type: "circle",
-      //         r: 4,
-      //         strokeWidth: 0,
-      //       },
-      //       labels: [
-      //         {
-      //           text: "No",
-      //           align: "center",
-      //           point: {
-      //             y:
-      //               (Math.max(
-      //                 Math.max(
-      //                   ...callData.map((callprice) => {
-      //                     return Math.abs(callprice);
-      //                   })
-      //                 ),
-      //                 Math.max(...putData)
-      //               ) /
-      //                 2) *
-      //               1.3,
-      //             x: putData.length - 2,
-      //             yAxis: 0,
-      //             xAxis: 0,
-      //           },
-      //           style: {
-      //             color: "red",
-      //           },
-      //         },
-      //         {
-      //           text: "Yes",
-      //           align: "center",
-      //           point: {
-      //             y:
-      //               -Math.max(
-      //                 Math.max(
-      //                   ...callData.map((callprice) => {
-      //                     return Math.abs(callprice);
-      //                   })
-      //                 ),
-      //                 Math.max(...putData)
-      //               ) / 2,
-      //             x: putData.length - 2,
-      //             yAxis: 0,
-      //             xAxis: 0,
-      //           },
-      //           style: {
-      //             color: "green",
-      //           },
-      //         },
-      //       ],
-      //       shapes: [
-      //         {
-      //           point: {
-      //             y: -20,
-      //             // x: settings.PlotLines[0].value,
-      //             yAxis: 0,
-      //             xAxis: 0,
-      //           },
-      //           //   fill: settings.PlotLines[0].color,
-      //         },
-      //         {
-      //           point: {
-      //             y: 20,
-      //             // x: settings.PlotLines[1].value,
-      //             yAxis: 0,
-      //             xAxis: 0,
-      //           },
-      //           //   fill: settings.PlotLines[1].color,
-      //         },
-      //       ],
-      //       draggable: "",
-      //       crop: false,
-      //     },
-      //   ],
+
       tooltip: {
+        formatter: function () {
+          return `<span style="font-size:10px">${
+            this.x
+          }</span><br/><span style="color:${this.series.color}">● </span>${
+            this.series.name
+          }: <b> ${Highcharts.numberFormat(
+            this.series.name === "Call" ? -this.y : this.y,
+            0
+          )} `;
+        },
+
         backgroundColor: "transparent",
         style: {
           color: "#F0F0F0",
@@ -308,6 +325,7 @@ const EODSummaryGraph = (props) => {
       },
       plotOptions: {
         series: {
+          maxPointWidth: 20,
           dataLabels: {
             color: "#F0F0F3",
             style: {
@@ -315,13 +333,13 @@ const EODSummaryGraph = (props) => {
             },
           },
           marker: {
-            lineColor: "#333",
+            lineColor: "white",
           },
           stacking: "normal",
           borderRadius: "3%",
         },
         boxplot: {
-          fillColor: "#505053",
+          //   fillColor: "#505053",
         },
         candlestick: {
           lineColor: "white",
@@ -329,19 +347,41 @@ const EODSummaryGraph = (props) => {
         errorbar: {
           color: "white",
         },
+        bar: {
+          borderWidth: 0.5,
+        },
       },
-      //   annotations: [
-      //     {
-      //       labels: [
-      //         {
-      //           point: { x: 0, y: -1500 },
-      //           padding: 25,
-      //           text: "Label",
-      //         },
-      //       ],
-      //     },
-      //   ],
+      annotations: [
+        {
+          shapeOptions: {
+            type: "circle",
+            r: 4,
+            strokeWidth: 0,
+          },
+          shapes: [
+            {
+              point: {
+                y: -20,
+                x: allData.Futures === undefined ? 0 : allData.Futures[0].Low,
+                yAxis: 0,
+                xAxis: 0,
+              },
+              fill: "blue",
+            },
+            {
+              point: {
+                y: 50,
+                x: 50,
+                yAxis: 0,
+                xAxis: 0,
+              },
+              fill: "blue",
+            },
+          ],
+        },
+      ],
       legend: {
+        enabled: false,
         itemMarginBottom: 0,
         itemMarginTop: 0,
         margin: 0,
@@ -373,8 +413,11 @@ const EODSummaryGraph = (props) => {
         trackBorderColor: "#404043",
       },
       title: {
-        text: "YES",
-        align: "center",
+        text:
+          allData.Futures === undefined
+            ? sym
+            : `${sym} (${allData.Futures[0].Symbol})`,
+        align: "left",
         style: {
           color: "#E0E0E3",
           textTransform: "uppercase",
@@ -421,11 +464,21 @@ const EODSummaryGraph = (props) => {
 
       xAxis: [
         {
+          plotLines: [
+            {
+              // mark the weekend
+              color: "red",
+              width: 20,
+              x: 9.5,
+              dashStyle: "longdashdot",
+            },
+          ],
           gridLineColor: "white",
           labels: {
             style: {
               color: "#E0E0E3",
             },
+            step: 1,
           },
           lineColor: "#707073",
           minorGridLineColor: "#505053",
@@ -438,10 +491,6 @@ const EODSummaryGraph = (props) => {
 
           categories: categories,
           reversed: true,
-
-          labels: {
-            step: 1,
-          },
           accessibility: {
             description: "call",
           },
@@ -452,6 +501,7 @@ const EODSummaryGraph = (props) => {
             style: {
               color: "#E0E0E3",
             },
+            step: 1,
           },
           lineColor: "#707073",
           minorGridLineColor: "#505053",
@@ -466,9 +516,7 @@ const EODSummaryGraph = (props) => {
           reversed: true,
           categories: categories,
           linkedTo: 0,
-          labels: {
-            step: 1,
-          },
+
           accessibility: {
             description: "put",
           },
@@ -522,7 +570,7 @@ const EODSummaryGraph = (props) => {
 
         labels: {
           style: {
-            color: "#707073",
+            color: "white",
           },
           formatter: function () {
             return Math.abs(this.value);
@@ -626,6 +674,7 @@ const EODSummaryGraph = (props) => {
       `https://quikoptions.info/api/eventConData?eventConDataProdSym=${sym}`
     ).then((response) => {
       console.log(response.data);
+      setAllData(response.data);
 
       try {
         containerRef.current.style.opacity = callData.includes("noneAvail")
@@ -690,7 +739,41 @@ const EODSummaryGraph = (props) => {
   }, [props.prodName]);
 
   return (
-    <div style={{ width: `${width}px`, height: `${width}px` }}>
+    <div
+      style={{
+        border: "2px double gold",
+        borderRadius: "2px",
+        outline: "4px inset #bbb5c6",
+
+        outlineOffset: "1px",
+        width: `${width}px`,
+        height: `${height}px`,
+        marginLeft: "5px",
+        marginTop: "5px",
+      }}
+    >
+      {/* "#42B39A",
+        "#02757D",
+        "#46947a", "#075645"*/}
+      <div
+        style={{
+          background: "linear-gradient(60deg,  #075645,#46947a, #075645)",
+          width: `${width - 3}px`,
+          height: `${30}px`,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          //   borderBottom: "1px inset blue",
+        }}
+      >
+        <div style={{ fontWeight: "450" }}>
+          {allData.Futures === undefined
+            ? ""
+            : `${allData.Futures[0].Symbol} @ ${allData.Futures[0].Last} (${
+                allData.Futures[0].Last - allData.Futures[0].Settle
+              })`}
+        </div>
+      </div>
       {/* <img
         src={QSIcon}
         style={{

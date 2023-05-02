@@ -106,7 +106,7 @@
 }
 .endDropdown.lightOHLC  a.dropdown-toggle.nav-link::after{
   transform: rotate(-90deg)!important;
-  color: black !important;
+  /* color: black !important; */
 }
 .endDropdown div.dropdown-menu.show{
   padding: 2px 5px 2px 5px!important;
