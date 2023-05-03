@@ -15,6 +15,8 @@ import { useMediaQuery } from "react-responsive";
 import DropdownButton from "react-bootstrap/DropdownButton";
 import { NavDropdown, Dropdown } from "react-bootstrap";
 import { ExclamationTriangle } from "react-bootstrap-icons";
+import { isChrome, isFirefox, isSafari } from "react-device-detect";
+
 // import ExpiryFutSymbolButton from "../../Components/ExpiryFutSymbolButton";
 // import ProdNameToSym from "../../AuxillaryFunctions/ProdNameToSym";
 require("highcharts/modules/exporting")(Highcharts);
@@ -44,6 +46,7 @@ const EODSummaryGraph = (props) => {
   const [allData, setAllData] = useState([[0, 0, 0, 0, 0, 0]]);
 
   const [options, setOptions] = useState();
+  const [refreshSwitch, setRefreshSwitch] = useState(false);
 
   //used to store top right expiry buttons` DOM node and programatically scroll to left 0 on render
   const expButtonsRef = useRef(null);
@@ -101,8 +104,10 @@ const EODSummaryGraph = (props) => {
             var lowPlotLineValue = 0,
               midPlotLineValue = 0,
               highPlotLineValue = 0;
+            console.log(categories);
 
             for (let i = 0; i < categories.length - 1; i++) {
+              console.log(allData.Futures[0]);
               //find low plotline value
               if (
                 categories[i + 1] > allData.Futures[0].Low &&
@@ -180,6 +185,11 @@ const EODSummaryGraph = (props) => {
                   borderColor: "transparent",
                   backgroundColor: "rgba(70,127,202,0.2)",
                   style: {
+                    height: "2px",
+                    clipPath: isChrome
+                      ? "inset(4.5px 0px 3px 0px round 2px)"
+                      : "inset(5.5px 0px 3px 0px round 2px)",
+                    maxHeight: "2px",
                     fontSize: `${Math.min(
                       Math.max(10.5, (width / 100) * 1.9),
                       14
@@ -202,8 +212,13 @@ const EODSummaryGraph = (props) => {
                       xAxis: 0,
                     },
                     style: {
-                      color: "#D51625",
-                      fontWeight: "800",
+                      color: "#EB4335",
+                      paintOrder: "stroke",
+                      stroke: "#000000",
+                      strokeWidth: "0.75px",
+                      // strokeLinecap: "butt",
+                      // strokeLinejoin: "miter",
+                      fontWeight: "700",
                     },
                   },
                   {
@@ -223,7 +238,7 @@ const EODSummaryGraph = (props) => {
                       strokeWidth: "0.5px",
                       // strokeLinecap: "butt",
                       // strokeLinejoin: "miter",
-                      fontWeight: "800",
+                      fontWeight: "500",
                     },
                   },
                 ],
@@ -285,10 +300,10 @@ const EODSummaryGraph = (props) => {
               .add(chart.customImgGroup);
           },
           load() {
-            if (!isMobile) {
+            try {
               let chart = this;
               chart.stockTools.showhideBtn.click();
-            }
+            } catch {}
           },
         },
       },
@@ -326,12 +341,12 @@ const EODSummaryGraph = (props) => {
       plotOptions: {
         series: {
           maxPointWidth: 20,
-          dataLabels: {
-            color: "#F0F0F3",
-            style: {
-              fontSize: "13px",
-            },
-          },
+          //   dataLabels: {
+          //     color: "#F0F0F3",
+          //     style: {
+          //       fontSize: "13px",
+          //     },
+          //   },
           marker: {
             lineColor: "white",
           },
@@ -348,6 +363,10 @@ const EODSummaryGraph = (props) => {
           color: "white",
         },
         bar: {
+          //   dataLabels: {
+          //     enabled: true,
+          //     align: "center",
+          //   },
           borderWidth: 0.5,
         },
       },
@@ -586,11 +605,58 @@ const EODSummaryGraph = (props) => {
           name: "Call",
           data: callData,
           type: "bar",
+          dataLabels: {
+            formatter: function () {
+              console.log(this);
+              return Math.abs(this.y);
+            },
+
+            padding: 5,
+            // backgroundColor: "blue",
+            // borderWidth: 2,
+            animation: {
+              defer: 6000,
+            },
+            verticalAlign: "middle",
+            style: {
+              color: "#C8C8C8",
+              fontSize: "10.5px",
+              strokeWidth: "0.2px",
+              fontWeight: "bold",
+              textOutline: "black",
+              fontStyle: "italic",
+            },
+            enabled: true,
+            align: "right",
+            x: -1,
+            // y: -1,
+          },
         },
         {
           name: "Put",
           data: putData,
           type: "bar",
+          dataLabels: {
+            // useHTML: true,
+            verticalAlign: "middle",
+            // shape: "callout",
+            // backgroundColor: "blue",
+            enabled: true,
+            position: "right",
+            inside: true,
+            padding: 2,
+            y: -1,
+            style: {
+              color: "#D4D4D4",
+              fontSize: "9px",
+              strokeWidth: "0.5px",
+              fontWeight: "bold",
+              textOutline: "black",
+              fontStyle: "italic",
+            },
+            align: "left",
+            x: 1,
+          },
         },
       ],
       exporting: {
@@ -669,11 +735,28 @@ const EODSummaryGraph = (props) => {
         : "0.9";
     } catch {}
 
+    let CancelToken = axios.CancelToken;
+    let source = CancelToken.source();
     axios(
       //   `https://quikoptions.info/api/straddles?straddleSym=${sym}`
-      `https://quikoptions.info/api/eventConData?eventConDataProdSym=${sym}`
+      `https://quikoptions.info/api/eventConData?eventConDataProdSym=${sym.toUpperCase()}`,
+      { cancelToken: source.token }
     ).then((response) => {
       console.log(response.data);
+      if (response.data.Symbol !== undefined) {
+        window.sym = response.data.Symbol;
+      } else if (response.data.includes("NONE AVAIL")) {
+        setCallData("noneAvail");
+        setOptions();
+        return;
+      }
+      if (
+        response.data.Symbol !== sym.toUpperCase() &&
+        window.sym !== sym.toUpperCase()
+      ) {
+        setRefreshSwitch(!refreshSwitch);
+        return;
+      }
       setAllData(response.data);
 
       try {
@@ -736,20 +819,22 @@ const EODSummaryGraph = (props) => {
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.prodName]);
+  }, [refreshSwitch]);
 
   return (
     <div
+      className={
+        isChrome
+          ? "eventConDivChrome"
+          : isSafari
+          ? "eventConDivSafari"
+          : isFirefox
+          ? "eventConDivFirefox"
+          : "eventConDivSafari"
+      }
       style={{
-        border: "2px double gold",
-        borderRadius: "2px",
-        outline: "4px inset #bbb5c6",
-
-        outlineOffset: "1px",
         width: `${width}px`,
         height: `${height}px`,
-        marginLeft: "5px",
-        marginTop: "5px",
       }}
     >
       {/* "#42B39A",
@@ -767,11 +852,32 @@ const EODSummaryGraph = (props) => {
         }}
       >
         <div style={{ fontWeight: "450" }}>
-          {allData.Futures === undefined
-            ? ""
-            : `${allData.Futures[0].Symbol} @ ${allData.Futures[0].Last} (${
-                allData.Futures[0].Last - allData.Futures[0].Settle
-              })`}
+          {allData.Futures === undefined ? (
+            ""
+          ) : (
+            <div>
+              <span
+                style={{ color: "white", fontWeight: "500" }}
+              >{`${allData.Futures[0].Symbol}`}</span>
+              <span
+                style={{ color: "white" }}
+              >{` @ ${allData.Futures[0].Last}`}</span>
+              <span> (</span>
+              <span
+                style={{
+                  color:
+                    allData.Futures[0].Last - allData.Futures[0].Settle > 0
+                      ? "#84CD85"
+                      : "red",
+                }}
+              >{`${Intl.NumberFormat("en-US", {
+                signDisplay: "exceptZero",
+              }).format(
+                (allData.Futures[0].Last - allData.Futures[0].Settle).toFixed(3)
+              )}`}</span>
+              <span>)</span>
+            </div>
+          )}
         </div>
       </div>
       {/* <img
