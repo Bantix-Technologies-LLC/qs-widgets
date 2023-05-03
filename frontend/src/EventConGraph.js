@@ -87,7 +87,7 @@ const EODSummaryGraph = (props) => {
         width: width,
         height: height - 31,
 
-        marginBottom: 50,
+        marginTop: 42,
         backgroundColor: {
           linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
           stops: [
@@ -183,12 +183,12 @@ const EODSummaryGraph = (props) => {
                   y: -10,
                   shape: "rect",
                   borderColor: "transparent",
-                  backgroundColor: "rgba(70,127,202,0.2)",
+                  backgroundColor: "rgba(76,191,229,0.07)",
                   style: {
                     height: "2px",
                     clipPath: isChrome
-                      ? "inset(4.5px 0px 3px 0px round 2px)"
-                      : "inset(5.5px 0px 3px 0px round 2px)",
+                      ? "inset(4.5px 1.5px 3px 0px round 4px)"
+                      : "inset(5.5px 1.5px 3px 0px round 4px)",
                     maxHeight: "2px",
                     fontSize: `${Math.min(
                       Math.max(10.5, (width / 100) * 1.9),
@@ -238,7 +238,7 @@ const EODSummaryGraph = (props) => {
                       strokeWidth: "0.5px",
                       // strokeLinecap: "butt",
                       // strokeLinejoin: "miter",
-                      fontWeight: "500",
+                      fontWeight: "700",
                     },
                   },
                 ],
@@ -483,6 +483,9 @@ const EODSummaryGraph = (props) => {
 
       xAxis: [
         {
+          title: {
+            text: "PRemum",
+          },
           plotLines: [
             {
               // mark the weekend
@@ -515,6 +518,9 @@ const EODSummaryGraph = (props) => {
           },
         },
         {
+          title: {
+            text: "PRemum",
+          },
           gridLineColor: "#444",
           labels: {
             style: {
@@ -543,11 +549,7 @@ const EODSummaryGraph = (props) => {
       ],
       yAxis: {
         gridLineColor: "#E0E0E3",
-        labels: {
-          style: {
-            color: "#E0E0E3",
-          },
-        },
+
         crosshair: {
           label: {
             backgroundColor: "rgba(0, 0, 0, 0.60)",
@@ -555,16 +557,23 @@ const EODSummaryGraph = (props) => {
         },
         lineColor: "#707073",
         minorGridLineColor: "#505053",
-        tickColor: "#707073",
+        tickColor: "transparent",
         tickWidth: 1,
-        title: {
-          style: {
-            color: "#A0A0A3",
-          },
-        },
+        lineWidth: 1,
 
+        // margin: -80,
         title: {
-          text: null,
+          margin: 4,
+          //   offset: -50,
+          style: {
+            // margin: "0",
+
+            // bottom: "-10px",
+            color: "#CBCBCD",
+            // color: "white",
+            fontWeight: "500",
+          },
+          text: "Premium ($)",
         },
         min: callData.includes("noneAvail")
           ? 0
@@ -588,6 +597,10 @@ const EODSummaryGraph = (props) => {
             ),
 
         labels: {
+          distance: 7,
+          padding: 0,
+          //   x: 10,
+
           style: {
             color: "white",
           },
@@ -632,7 +645,7 @@ const EODSummaryGraph = (props) => {
               fontWeight: "400",
               //   fontWeight: "bold",
               textOutline: "transparent",
-              fontStyle: "italic",
+              //   fontStyle: "italic",
             },
             enabled: true,
             align: "right",
@@ -662,7 +675,7 @@ const EODSummaryGraph = (props) => {
 
               //   fontWeight: "bold",
               textOutline: "black",
-              fontStyle: "italic",
+              //   fontStyle: "italic",
             },
             align: "left",
             x: 1,
@@ -853,7 +866,7 @@ const EODSummaryGraph = (props) => {
       <div
         style={{
           background: "linear-gradient(60deg,  #075645,#46947a, #075645)",
-          width: `${width - 3}px`,
+          width: `${width - (isChrome ? 4 : 3)}px`,
           height: `${30}px`,
           display: "flex",
           justifyContent: "center",
