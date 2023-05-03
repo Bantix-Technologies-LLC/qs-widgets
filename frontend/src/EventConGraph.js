@@ -637,7 +637,7 @@ const EODSummaryGraph = (props) => {
             enabled: true,
             align: "right",
             x: -1,
-            y: -2,
+            y: isChrome ? -2 : -1,
           },
         },
         {
