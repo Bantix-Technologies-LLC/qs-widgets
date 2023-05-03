@@ -619,17 +619,25 @@ const EODSummaryGraph = (props) => {
             },
             verticalAlign: "middle",
             style: {
-              color: "#C8C8C8",
-              fontSize: "10.5px",
+              alpha: "0.5",
+
+              color: "white",
+              fontSize:
+                width > 550 || height > 550
+                  ? "9px"
+                  : width > 650 || height > 650
+                  ? "10px"
+                  : "8px",
               strokeWidth: "0.2px",
-              fontWeight: "bold",
-              textOutline: "black",
+              fontWeight: "400",
+              //   fontWeight: "bold",
+              textOutline: "transparent",
               fontStyle: "italic",
             },
             enabled: true,
             align: "right",
             x: -1,
-            // y: -1,
+            y: -2,
           },
         },
         {
@@ -645,12 +653,14 @@ const EODSummaryGraph = (props) => {
             position: "right",
             inside: true,
             padding: 2,
-            y: -1,
+            y: -2,
             style: {
               color: "#D4D4D4",
               fontSize: "9px",
-              strokeWidth: "0.5px",
-              fontWeight: "bold",
+              strokeWidth: "0px",
+              fontWeight: "600",
+
+              //   fontWeight: "bold",
               textOutline: "black",
               fontStyle: "italic",
             },
