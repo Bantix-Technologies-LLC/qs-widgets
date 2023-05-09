@@ -4,16 +4,50 @@
     fill: red;
     font-weight: normal;
 }
+
 .eventConDivChrome{ 
     border: 2px double gold;
     border-radius: 2px;
     outline:4px inset #bbb5c6;
-
+    
     outline-offset: 1px;
    
     margin-left: 5px;
     margin-top: 5px;
 }
+.eventConDivChrome.light{ 
+    border: 2px double #A1ABFF;
+    border-right: 1px double #a1aaff41;
+    border-radius: 2px;
+    outline:3.5px ridge #474d51a8;
+    
+    outline-offset: 1.7px;
+   
+    margin-left: 4.8px;
+    margin-top: 5px;
+}
+.eventConDivChrome.light2{ 
+    border: 2px solid rgb(54, 54, 54,0.5);
+    border-radius: 2px;
+    outline:3px ridge #bbb5c6;
+    
+    outline-offset: 1px;
+   
+    margin-left: 5px;
+    margin-top: 5px;
+}
+.eventConDivChrome.dark{ 
+    border: 2px double #6c6d74;
+    border-right: 1px double #a1aaff41;
+    border-radius: 2px;
+    outline:2px ridge #020303a8;
+    
+    outline-offset: 1px;
+   
+    margin-left: 4.8px;
+    margin-top: 5px;
+}
+
 .eventConDivSafari{
     border: 2px double #D7BE3E;
     border-radius: 2px;
@@ -21,6 +55,48 @@
     border-top: 1px solid #D7BE3E;
 
     border-left: 1px solid #D7BE3E;
+
+    margin-left: 2.5px;
+    margin-top: 5px;
+
+        position: relative;
+        border-radius: 6px;
+}
+.eventConDivSafari.light{
+    border: 2px double #9AA1E1;
+    border-radius: 2px;
+    /* border-top: 1.5px solid #1A5042; */
+    border-top: 1px solid #9AA1E1;
+
+    border-left: 1px solid #9AA1E1;
+
+    margin-left: 2.5px;
+    margin-top: 5px;
+
+        position: relative;
+        border-radius: 6px;
+}
+.eventConDivSafari.light2{
+    border: 2px double rgb(54, 54, 54);
+    border-radius: 2px;
+    /* border-top: 1.5px solid #1A5042; */
+    border-top: 1px solid rgb(54, 54, 54);
+
+    border-left: 1px solid rgb(54, 54, 54);
+
+    margin-left: 2.5px;
+    margin-top: 5px;
+
+        position: relative;
+        border-radius: 6px;
+}
+.eventConDivSafari.dark{
+    border: 2px double #6c6d74;
+    border-radius: 2px;
+    /* border-top: 1.5px solid #1A5042; */
+    border-top: 1px solid #6c6d74;
+
+    border-left: 1px solid #6c6d74;
 
     margin-left: 2.5px;
     margin-top: 5px;
@@ -39,6 +115,39 @@
     /* border-left: 3px ridge #1A5042; */
     border-radius: 7px;
   }
+  .eventConDivSafari.light::before {
+    content: "";
+    position: absolute;
+    top: -5px; 
+    right: -6px;
+    bottom: -5px; 
+    left: -4.5px; 
+    border: 3px ridge #474d51c0;
+    /* border-left: 3px ridge #1A5042; */
+    border-radius: 7px;
+  }
+  .eventConDivSafari.light2::before {
+    content: "";
+    position: absolute;
+    top: -6.25px; 
+    right: -5px;
+    bottom: -6px; 
+    left: -6px; 
+    border: 4px ridge #bbb5c64b;
+    /* border-left: 3px ridge #1A5042; */
+    border-radius: 7px;
+  }
+  .eventConDivSafari.dark::before {
+    content: "";
+    position: absolute;
+    top: -5px; 
+    right: -6px;
+    bottom: -5px; 
+    left: -4.5px; 
+    border: 3px ridge #474d51c0;
+    /* border-left: 3px ridge #1A5042; */
+    border-radius: 7px;
+  }
 
   .eventConDivFirefox{
     border: 2px double #D7BE3E;
@@ -47,6 +156,34 @@
     border-top: 1px solid #D7BE3E;
 
     border-left: 1px solid #D7BE3E;
+
+    margin-left: 2.5px;
+    margin-top: 4px;
+
+        position: relative;
+        border-radius: 6px;
+}
+.eventConDivFirefox.light{
+    border: 4px double #9AA1E1;
+    border-radius: 2px;
+    /* border-top: 1.5px solid #1A5042; */
+    border-top: 1px solid #9AA1E1;
+
+    border-left: 1px solid #9AA1E1;
+
+    margin-left: 2.5px;
+    margin-top: 4px;
+
+        position: relative;
+        border-radius: 6px;
+}
+.eventConDivFirefox.dark{
+    border: 4px double rgb(234, 234, 234);
+    border-radius: 2px;
+    /* border-top: 1.5px solid #1A5042; */
+    border-top: 1px solid rgb(234, 234, 234);
+
+    border-left: 1px solid rgb(234, 234, 234);
 
     margin-left: 2.5px;
     margin-top: 4px;
@@ -65,6 +202,30 @@
     /* border-left: 3px ridge #1A5042; */
     border-radius: 7px;
   }
+  .eventConDivFirefox.light::before {
+    content: "";
+    position: absolute;
+    top: -5.25px; 
+    right: -6px;
+    bottom: -8px; 
+    left: -4.5px; 
+    border: 3px ridge #474d51c0;
+    /* border-left: 3px ridge #1A5042; */
+    border-radius: 7px;
+  }
+  .eventConDivFirefox.dark::before {
+    content: "";
+    position: absolute;
+    top: -5.25px; 
+    right: -5px;
+    bottom: -7px; 
+    left: -4.5px; 
+    border: 3px ridge #474d51c0;
+    /* border-left: 3px ridge #1A5042; */
+    border-radius: 7px;
+  }
+
+  
 .chart:-webkit-full-screen {
   width: 100%;
   height: 100%;
@@ -190,3 +351,16 @@
 /* .highcharts-plot-background{
   height:fit-content;
 } */
+div.highcharts-toggle-toolbar.highcharts-arrow-left.highcharts-arrow-right{
+    visibility: hidden!important;
+    opacity: 0!important;
+    width: 0!important;
+    height: 0!important;
+
+}
+.highcharts-bindings-wrapper .highcharts-arrow-left.highcharts-arrow-right {
+    visibility: hidden!important;
+}
+.highcharts-bindings-wrapper .highcharts-arrow-left { 
+    display: none!important;
+ }

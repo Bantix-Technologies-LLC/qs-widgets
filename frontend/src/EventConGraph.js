@@ -10,6 +10,8 @@ import priceIndicator from "highcharts/modules/price-indicator";
 import fullScreen from "highcharts/modules/full-screen";
 import stockTools from "highcharts/modules/stock-tools";
 import QSIcon from "./QSIconDark3.png";
+import QSIconLight from "./graphQS.png";
+import QSIconDark from "./QSIconLight.png";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useMediaQuery } from "react-responsive";
 import DropdownButton from "react-bootstrap/DropdownButton";
@@ -32,6 +34,10 @@ const EODSummaryGraph = (props) => {
   const [sym, setSym] = useState(searchParams.get("sym"));
   const [width, setWidth] = useState(searchParams.get("width"));
   const [height, setHeight] = useState(searchParams.get("height"));
+  const [strikeRange, setStrikeRange] = useState(
+    Number(searchParams.get("strikerange"))
+  );
+  const [theme, setTheme] = useState(Number(searchParams.get("theme")));
 
   const zoomButton = useRef(null);
   const isMobile = useMediaQuery({ query: `(max-width: 1200px)` }); //state for detecting device that app is running on
@@ -66,208 +72,337 @@ const EODSummaryGraph = (props) => {
 
     chartRef.current = Highcharts.chart(containerRef.current, {
       chartType: "bar",
-      colors: [
-        "rgb(204,168,71,0.9)",
-        "#AD3236",
-        "#942B36",
-        "#024E73",
+      colors: [1, 2].includes(theme)
+        ? [
+            "rgb(69,158,84,0.9)",
+            "#C4393F",
+            "#942B36",
+            "#024E73",
 
-        "#E1A33C",
-        "#B31E30",
-        "#B38904",
-        "#B3701E",
-        "#42B39A",
-        "#02757D",
-        "#46947a",
-        "#024E73",
-        "#B3431E",
-        "#f39c12",
-      ],
+            "#E1A33C",
+            "#B31E30",
+            "#B38904",
+            "#B3701E",
+            "#42B39A",
+            "#02757D",
+            "#46947a",
+            "#024E73",
+            "#B3431E",
+            "#f39c12",
+          ]
+        : [
+            "rgb(69,158,84,0.9)",
+            "#AD3236",
+            "#942B36",
+            "#024E73",
+
+            "#E1A33C",
+            "#B31E30",
+            "#B38904",
+            "#B3701E",
+            "#42B39A",
+            "#02757D",
+            "#46947a",
+            "#024E73",
+            "#B3431E",
+            "#f39c12",
+          ],
+      stockTools: {
+        // enabled: false,
+        gui: {
+          enabled: false,
+        },
+      },
       chart: {
-        width: width,
+        width:
+          width -
+          (isChrome && [1, 2].includes(theme)
+            ? 1.5
+            : isChrome && theme === 3
+            ? 2.5
+            : 0),
         height: height - 31,
 
         marginTop: 42,
-        backgroundColor: {
-          linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
-          stops: [
-            [0, "#054D3D"],
-            [1, "#076652"],
-          ],
-        },
+        backgroundColor:
+          theme === 1
+            ? {
+                radialGradient: { cx: 0.5, cy: 0.5, r: 0.9 },
+                stops: [
+                  [0, "#E1E1E1"],
+
+                  [0.2, "#DDDDDD"],
+                  [0.5, "#EEEEEE"],
+                  [0.65, "#E7E7E7"],
+                  [1, "#E1E1E1"],
+                  // [3, "white"],
+                ],
+              }
+            : theme === 2
+            ? {
+                linearGradient: { x1: 0, y1: 0, x2: 1, y2: 0 },
+                stops: [
+                  [0, "#CCD9DC"],
+                  [1, "#EEF2F1"],
+                ],
+              }
+            : theme === 3
+            ? {
+                linearGradient: { x1: 0, y1: 0, x2: 1, y2: 0 },
+                stops: [
+                  [0, "#4c4c4c"],
+                  [0.5, "#191919"],
+                  //   [0.5, "black"],
+                  [1, "#444444"],
+                ],
+              }
+            : {
+                linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
+                stops: [
+                  [0, "#054D3D"],
+                  [1, "#076652"],
+                ],
+              },
         borderColor: "#606063",
         plotBorderColor: "#606063",
         borderWidth: 1,
         // height: 550,
         events: {
-          redraw() {
-            var lowPlotLineValue = 0,
-              midPlotLineValue = 0,
-              highPlotLineValue = 0;
-            console.log(categories);
-
-            for (let i = 0; i < categories.length - 1; i++) {
-              console.log(allData.Futures[0]);
-              //find low plotline value
-              if (
-                categories[i + 1] > allData.Futures[0].Low &&
-                lowPlotLineValue === 0
-              ) {
-                lowPlotLineValue =
-                  i +
-                  (allData.Futures[0].Low - categories[i]) /
-                    (categories[i + 1] - categories[i]);
-              }
-              //find mid plotline value
-              if (
-                categories[i + 1] > allData.Futures[0].Mid &&
-                midPlotLineValue === 0
-              ) {
-                midPlotLineValue =
-                  i +
-                  (allData.Futures[0].Mid - categories[i]) /
-                    (categories[i + 1] - categories[i]);
-              }
-              //find high plotline value
-              if (
-                categories[i + 1] > allData.Futures[0].High &&
-                highPlotLineValue === 0
-              ) {
-                highPlotLineValue =
-                  i +
-                  (allData.Futures[0].High - categories[i]) /
-                    (categories[i + 1] - categories[i]);
-              }
-              if (
-                lowPlotLineValue !== 0 &&
-                midPlotLineValue !== 0 &&
-                highPlotLineValue !== 0
-              ) {
-                break;
-              }
-            }
-
-            ///////////////////////
-            //////Add Plot Lines///
-            ///////////////////////
-            this.xAxis[0].addPlotLine({
-              color: "#1E7B7A",
-              dashStyle: "ShortDash",
-              value: lowPlotLineValue,
-              width: 2.5,
-              id: "low",
-            });
-            this.xAxis[0].addPlotLine({
-              color: "rgba(215,193,136,0.5)",
-
-              value: midPlotLineValue,
-              width: 3,
-              id: "mid",
-            });
-            this.xAxis[0].addPlotLine({
-              color: "#007BB5",
-              dashStyle: "ShortDash",
-
-              value: highPlotLineValue,
-              width: 2.5,
-              id: "high",
-            });
-
-            ///////////////////////
-            ///YES and NO Labels///
-            ///////////////////////
-            if (width >= 370) {
-              this.addAnnotation({
-                labelOptions: {
-                  overflow: "allow",
-                  y: -10,
-                  shape: "rect",
-                  borderColor: "transparent",
-                  backgroundColor: "rgba(76,191,229,0.07)",
-                  style: {
-                    height: "2px",
-                    clipPath: isChrome
-                      ? "inset(4.5px 1.5px 3px 0px round 4px)"
-                      : "inset(5.5px 1.5px 3px 0px round 4px)",
-                    maxHeight: "2px",
-                    fontSize: `${Math.min(
-                      Math.max(10.5, (width / 100) * 1.9),
-                      14
-                    )}pt`,
-                  },
-                },
-                shapeOptions: {
-                  type: "circle",
-                  r: 4,
-                  strokeWidth: 0,
-                },
-                labels: [
-                  {
-                    text: "No",
-                    align: "center",
-                    point: {
-                      y: this.yAxis[0].getExtremes().max / 2,
-                      x: -0.3,
-                      yAxis: 0,
-                      xAxis: 0,
-                    },
-                    style: {
-                      color: "#EB4335",
-                      paintOrder: "stroke",
-                      stroke: "#000000",
-                      strokeWidth: "0.75px",
-                      // strokeLinecap: "butt",
-                      // strokeLinejoin: "miter",
-                      fontWeight: "700",
-                    },
-                  },
-                  {
-                    text: "Yes",
-                    align: "center",
-
-                    point: {
-                      y: -this.yAxis[0].getExtremes().max / 2,
-                      x: -0.3,
-                      yAxis: 0,
-                      xAxis: 0,
-                    },
-                    style: {
-                      color: "#459E54",
-                      paintOrder: "stroke",
-                      stroke: "#000000",
-                      strokeWidth: "0.5px",
-                      // strokeLinecap: "butt",
-                      // strokeLinejoin: "miter",
-                      fontWeight: "700",
-                    },
-                  },
-                ],
-                shapes: [
-                  {
-                    point: {
-                      y: 20,
-                      x: lowPlotLineValue,
-                      yAxis: 0,
-                      xAxis: 0,
-                    },
-                    fill: "rgb(0,111,255,0.5)",
-                  },
-                  {
-                    point: {
-                      y: -20,
-                      x: highPlotLineValue,
-                      yAxis: 0,
-                      xAxis: 0,
-                    },
-                    fill: "blue",
-                  },
-                ],
-                draggable: "",
-                crop: false,
-              });
-            }
-          },
+          redraw() {},
           render: function () {
+            console.log(this);
+            try {
+              const low = allData.Futures[0].Low,
+                mid = allData.Futures[0].Mid,
+                high = allData.Futures[0].High,
+                settle = allData.Futures[0].Settle;
+              var lowPlotLineValue = 0,
+                midPlotLineValue = 0,
+                highPlotLineValue = 0,
+                settlePlotLineValue = 0;
+
+              var lowPlotLineEnabled = low > categories[0];
+              var highPlotLineEnabled =
+                high < categories[categories.length - 1];
+              var settlePlotLineEnabled =
+                settle > categories[0] &&
+                settle < categories[categories.length - 1];
+
+              for (let i = 0; i < categories.length - 1; i++) {
+                //find low plotline value
+                if (categories[i + 1] > low && lowPlotLineValue === 0) {
+                  lowPlotLineValue =
+                    i +
+                    (low - categories[i]) / (categories[i + 1] - categories[i]);
+                }
+                //find mid plotline value
+                if (categories[i + 1] > mid && midPlotLineValue === 0) {
+                  midPlotLineValue =
+                    i +
+                    (mid - categories[i]) / (categories[i + 1] - categories[i]);
+                }
+                //find high plotline value
+                if (categories[i + 1] > high && highPlotLineValue === 0) {
+                  highPlotLineValue =
+                    i +
+                    (high - categories[i]) /
+                      (categories[i + 1] - categories[i]);
+                }
+                //find settle plotline value
+                if (categories[i + 1] > settle && highPlotLineValue === 0) {
+                  settlePlotLineValue =
+                    i +
+                    (settle - categories[i]) /
+                      (categories[i + 1] - categories[i]);
+                }
+                if (
+                  lowPlotLineValue !== 0 &&
+                  midPlotLineValue !== 0 &&
+                  highPlotLineValue !== 0 &&
+                  settlePlotLineValue !== 0
+                ) {
+                  break;
+                }
+              }
+
+              ///////////////////////
+              //////Add Plot Lines///
+              ///////////////////////
+              if (lowPlotLineEnabled)
+                this.xAxis[0].addPlotLine({
+                  //   color: "#1E7B7A",
+                  color: "rgb(255,0,0,0.5)",
+                  dashStyle: "ShortDash",
+                  value: lowPlotLineValue,
+                  width: 2,
+                  id: "low",
+                });
+              if (highPlotLineEnabled)
+                this.xAxis[0].addPlotLine({
+                  color: "#007BB5",
+                  dashStyle: "ShortDash",
+
+                  value: highPlotLineValue,
+                  width: 2.5,
+                  id: "high",
+                });
+              if (settlePlotLineEnabled)
+                this.xAxis[0].addPlotLine({
+                  color: "grey",
+                  //   dashStyle: "ShortDash",
+
+                  value: settlePlotLineValue,
+                  width: 1.5,
+                  id: "settle",
+                });
+
+              this.xAxis[0].addPlotLine({
+                color: "rgba(215,193,136,0.62)",
+
+                value: midPlotLineValue,
+                width: 3,
+                id: "mid",
+              });
+              ///////////////////////
+              ///YES and NO Labels///
+              ///////////////////////
+              if (width >= 370) {
+                const annLabelFontSize = Math.min(
+                  Math.max(10, (width / 100) * 1.9),
+                  14
+                );
+                this.addAnnotation({
+                  labelOptions: {
+                    overflow: "allow",
+                    y: -10,
+                    shape: "rect",
+                    borderColor: "transparent",
+                    backgroundColor:
+                      theme === 1
+                        ? "rgba(148,148,148,0.07)"
+                        : [3].includes(theme)
+                        ? "transparent"
+                        : "rgba(76,191,229,0.07)",
+                    style: {
+                      height: "2px",
+                      clipPath: [1, 2].includes(theme)
+                        ? "inset(2px 1.5px 3.5px 0px round 4px)"
+                        : isChrome
+                        ? "inset(4.5px 1.5px 3px 0px round 4px)"
+                        : "inset(5.5px 1.5px 3px 0px round 4px)",
+                      maxHeight: "2px",
+                      fontSize: `${annLabelFontSize}pt`,
+                    },
+                  },
+                  shapeOptions: {
+                    type: "circle",
+                    r: 4,
+                    strokeWidth: 0,
+                  },
+                  labels: [
+                    {
+                      useHTML: true,
+                      text: `<span style="fontSize: ${annLabelFontSize}pt; ${
+                        theme === 1 ? "color:#D93123" : ""
+                      }" }>No/</span><span style=" fontSize: ${Math.max(
+                        9.5,
+                        annLabelFontSize - 2
+                      )}pt"}>Put</span>`,
+                      align: "center",
+                      point: {
+                        y: this.yAxis[0].getExtremes().max / 2,
+                        x:
+                          categories.length < 3
+                            ? this.xAxis[0].getExtremes().min - 0.45
+                            : categories.length < 5
+                            ? this.xAxis[0].getExtremes().min - 0.4
+                            : categories.length < 7
+                            ? this.xAxis[0].getExtremes().min - 0.35
+                            : -0.3,
+                        yAxis: 0,
+                        xAxis: 0,
+                      },
+                      style: {
+                        color: "#EB4335",
+                        paintOrder: "stroke",
+                        stroke: "#000000",
+                        strokeWidth: "0.75px",
+                        // strokeLinecap: "butt",
+                        // strokeLinejoin: "miter",
+                        fontWeight: "700",
+                      },
+                    },
+                    {
+                      useHTML: true,
+                      text: `<span style="fontSize: ${annLabelFontSize}pt; ${
+                        theme === 1 ? "color:#129047;" : ""
+                      }" }>Yes/</span><span style=" fontSize: ${Math.max(
+                        9.5,
+                        annLabelFontSize - 2
+                      )}pt"}>Call</span>`,
+
+                      align: "center",
+
+                      point: {
+                        y: -this.yAxis[0].getExtremes().max / 2,
+                        x:
+                          categories.length < 3
+                            ? this.xAxis[0].getExtremes().min - 0.45
+                            : categories.length < 5
+                            ? this.xAxis[0].getExtremes().min - 0.4
+                            : categories.length < 7
+                            ? this.xAxis[0].getExtremes().min - 0.35
+                            : -0.3,
+                        yAxis: 0,
+                        xAxis: 0,
+                      },
+                      style: {
+                        color: "#459E54",
+                        paintOrder: "stroke",
+                        stroke: "#000000",
+                        strokeWidth: "0.5px",
+                        // strokeLinecap: "butt",
+                        // strokeLinejoin: "miter",
+                        fontWeight: "700",
+                      },
+                    },
+                  ],
+
+                  //////////////////////////////
+                  //////////////////////////////
+                  ////Plotline marker circles///
+                  //////////////////////////////
+                  //////////////////////////////
+                  shapes: [
+                    {
+                      point: lowPlotLineEnabled
+                        ? {
+                            y: 20,
+                            x: lowPlotLineValue,
+                            yAxis: 0,
+                            xAxis: 0,
+                          }
+                        : undefined,
+                      //   fill: "rgb(0,111,255,0.5)", //006FFF
+                      fill: "rgb(182,31,61,0.25)", //D70001
+                    },
+                    {
+                      point: highPlotLineEnabled
+                        ? {
+                            y: -20,
+                            x: highPlotLineValue,
+                            yAxis: 0,
+                            xAxis: 0,
+                          }
+                        : undefined,
+                      fill: "blue",
+                    },
+                  ],
+                  draggable: "",
+                  crop: false,
+                });
+              }
+            } catch {}
             const chart = this,
               renderer = chart.renderer;
 
@@ -295,15 +430,26 @@ const EODSummaryGraph = (props) => {
             // Create groups
             chart.customImgGroup = renderer.g("customImgGroup").add();
             // Render texts
+
             chart.renderer
-              .image(QSIcon, chart.plotBox.width, 20, 50, 50)
+              .image(
+                [1, 2].includes(theme)
+                  ? QSIconLight
+                  : theme === 3
+                  ? QSIconDark
+                  : QSIcon,
+                chart.plotBox.width,
+                20,
+                50,
+                50
+              )
               .add(chart.customImgGroup);
           },
           load() {
-            try {
-              let chart = this;
-              chart.stockTools.showhideBtn.click();
-            } catch {}
+            // try {
+            //   let chart = this;
+            //   chart.stockTools.showhideBtn.click();
+            // } catch {}
           },
         },
       },
@@ -314,15 +460,12 @@ const EODSummaryGraph = (props) => {
             this.x
           }</span><br/><span style="color:${this.series.color}">● </span>${
             this.series.name
-          }: <b> ${Highcharts.numberFormat(
-            this.series.name === "Call" ? -this.y : this.y,
-            0
-          )} `;
+          }: <b> ${this.series.name === "Call" ? -this.y : this.y} `;
         },
-
+        shadow: [1, 2].includes(theme) ? false : true,
         backgroundColor: "transparent",
         style: {
-          color: "#F0F0F0",
+          color: [1, 2].includes(theme) ? "#181818" : "#F0F0F0",
         },
       },
       labels: {
@@ -432,25 +575,24 @@ const EODSummaryGraph = (props) => {
         trackBorderColor: "#404043",
       },
       title: {
-        text:
-          allData.Futures === undefined
-            ? sym
-            : `${sym} (${allData.Futures[0].Symbol})`,
+        text: allData.Futures === undefined ? sym : `${sym}`,
         align: "left",
         style: {
-          color: "#E0E0E3",
+          color: [1, 2].includes(theme) ? "#3E4444" : "#E0E0E3",
           textTransform: "uppercase",
-          fontSize: "16px",
+          fontSize: "16.5px",
         },
       },
       navigation: {
         buttonOptions: {
-          symbolStroke: "#DDDDDD",
+          symbolStroke: [1, 2].includes(theme) ? "#2C2C2D" : "#DDDDDD",
           theme: {
-            fill: "#505053",
+            fill: [1, 2].includes(theme) ? "transparent" : "#505053",
             states: {
               hover: {
-                fill: "#707073",
+                fill: [1, 2].includes(theme)
+                  ? "rgba(112,112,112,0.2)"
+                  : "#707073",
               },
               select: {
                 fill: "#707073",
@@ -498,7 +640,7 @@ const EODSummaryGraph = (props) => {
           gridLineColor: "white",
           labels: {
             style: {
-              color: "#E0E0E3",
+              color: [1, 2].includes(theme) ? "#3E4444" : "#E0E0E3",
             },
             step: 1,
           },
@@ -524,7 +666,7 @@ const EODSummaryGraph = (props) => {
           gridLineColor: "#444",
           labels: {
             style: {
-              color: "#E0E0E3",
+              color: [1, 2].includes(theme) ? "#3E4444" : "#E0E0E3",
             },
             step: 1,
           },
@@ -548,7 +690,7 @@ const EODSummaryGraph = (props) => {
         },
       ],
       yAxis: {
-        gridLineColor: "#E0E0E3",
+        gridLineColor: [1, 2].includes(theme) ? "#3E4444" : "#E0E0E3",
 
         crosshair: {
           label: {
@@ -569,7 +711,7 @@ const EODSummaryGraph = (props) => {
             // margin: "0",
 
             // bottom: "-10px",
-            color: "#CBCBCD",
+            color: [1, 2].includes(theme) ? "#3E4444" : "#CBCBCD",
             // color: "white",
             fontWeight: "500",
           },
@@ -602,7 +744,7 @@ const EODSummaryGraph = (props) => {
           //   x: 10,
 
           style: {
-            color: "white",
+            color: [1, 2].includes(theme) ? "#3E4444" : "white",
           },
           formatter: function () {
             return Math.abs(this.value);
@@ -620,7 +762,6 @@ const EODSummaryGraph = (props) => {
           type: "bar",
           dataLabels: {
             formatter: function () {
-              console.log(this);
               return Math.abs(this.y);
             },
 
@@ -628,13 +769,14 @@ const EODSummaryGraph = (props) => {
             // backgroundColor: "blue",
             // borderWidth: 2,
             animation: {
-              defer: 6000,
+              defer: 3000,
             },
             verticalAlign: "middle",
             style: {
               alpha: "0.5",
 
-              color: "white",
+              color: [1, 2].includes(theme) ? "#3E4444" : "white",
+
               fontSize:
                 width > 550 || height > 550
                   ? "9px"
@@ -668,13 +810,13 @@ const EODSummaryGraph = (props) => {
             padding: 2,
             y: -2,
             style: {
-              color: "#D4D4D4",
+              color: [1, 2].includes(theme) ? "black" : "#D4D4D4",
               fontSize: "9px",
               strokeWidth: "0px",
               fontWeight: "600",
 
               //   fontWeight: "bold",
-              textOutline: "black",
+              textOutline: [1, 2].includes(theme) ? "white" : "black",
               //   fontStyle: "italic",
             },
             align: "left",
@@ -745,6 +887,32 @@ const EODSummaryGraph = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options, callData, chartRef.current, isMobile]);
 
+  const filterStrikes = (strikes, curPrice) => {
+    let filteredStrikes = strikes.filter(
+      (strike) => strike.Call.Mid !== null && strike.Put.Mid !== null
+    );
+
+    const highPt =
+      filteredStrikes.indexOf(
+        filteredStrikes.find((strike) => strike.StrikePrice > curPrice)
+      ) + strikeRange;
+    const lowPt =
+      filteredStrikes.indexOf(
+        filteredStrikes.find((strike) => strike.StrikePrice > curPrice)
+      ) -
+      1 -
+      strikeRange;
+
+    if (highPt - lowPt < 2) {
+      return filteredStrikes;
+    }
+
+    filteredStrikes = filteredStrikes.filter((strike, i) => {
+      return i < highPt && i > lowPt;
+    });
+    return filteredStrikes;
+  };
+
   useEffect(() => {
     setCallData([]);
     setPutData([]);
@@ -790,8 +958,6 @@ const EODSummaryGraph = (props) => {
         loadSpinnerRef.current.style.visibility = "hidden";
         loadSpinnerRef.current.style.opacity = "0";
 
-        console.log("!!");
-
         if (response.data.Symbol === undefined) {
           setCallData("noneAvail");
         } else {
@@ -799,20 +965,18 @@ const EODSummaryGraph = (props) => {
           //   setCallData(response.data.map((strike) => strike.CallPrice * -1));
           //   setPutData(response.data.map((strike) => strike.PutPrice));
 
+          const curPrice = response.data.Futures[0].Mid;
+          const strikes = response.data.Futures[0].Expirations[0].Strikes;
           setCategories(
-            response.data.Futures[0].Expirations[0].Strikes.filter(
-              (strike) => strike.Call.Mid !== null && strike.Put.Mid !== null
-            ).map((strike) => strike.StrikePrice)
+            filterStrikes(strikes, curPrice).map((strike) => strike.StrikePrice)
           );
           setCallData(
-            response.data.Futures[0].Expirations[0].Strikes.filter(
-              (strike) => strike.Call.Mid !== null && strike.Put.Mid !== null
-            ).map((strike) => strike.Call.Mid * -1)
+            filterStrikes(strikes, curPrice).map(
+              (strike) => strike.Call.Mid * -1
+            )
           );
           setPutData(
-            response.data.Futures[0].Expirations[0].Strikes.filter(
-              (strike) => strike.Call.Mid !== null && strike.Put.Mid !== null
-            ).map((strike) => strike.Put.Mid)
+            filterStrikes(strikes, curPrice).map((strike) => strike.Put.Mid)
           );
         }
         console.log(
@@ -829,7 +993,6 @@ const EODSummaryGraph = (props) => {
 
         //   calldata = [];
 
-        console.log("Setdata");
         setOptions();
       } catch {
         // console.log(data);
@@ -846,7 +1009,7 @@ const EODSummaryGraph = (props) => {
 
   return (
     <div
-      className={
+      className={`${
         isChrome
           ? "eventConDivChrome"
           : isSafari
@@ -854,7 +1017,15 @@ const EODSummaryGraph = (props) => {
           : isFirefox
           ? "eventConDivFirefox"
           : "eventConDivSafari"
-      }
+      }${
+        theme === 1
+          ? " light"
+          : theme === 2
+          ? " light2"
+          : theme === 3
+          ? " dark"
+          : ""
+      }`}
       style={{
         width: `${width}px`,
         height: `${height}px`,
@@ -865,8 +1036,27 @@ const EODSummaryGraph = (props) => {
         "#46947a", "#075645"*/}
       <div
         style={{
-          background: "linear-gradient(60deg,  #075645,#46947a, #075645)",
-          width: `${width - (isChrome ? 4 : 3)}px`,
+          //   border: "1px solid green",
+          borderTop: "1px solid green",
+          borderRadius: "2.5px",
+          borderBottom: theme === 3 ? "0.5px inset #B2B2B2" : "",
+          borderRight: theme === 3 ? "0.5px solid #B2B2B2" : "",
+
+          borderLeft: theme === 3 ? "0.5px solid #B2B2B2" : "",
+
+          background:
+            theme === 1
+              ? // ? "linear-gradient(60deg,  #E3E7F2 2%,#EFEFEF 5%,#EFEFEF 95%, #E3E7F2 97%)"
+                //   "linear-gradient(60deg, #F7F7F7 1%, #E3E3E3 3%, #E3E3E3 20%,#F7F7F7 40%, #F7F7F7 60%, #E3E3E3 80%,#E3E3E3 96%, #F7F7F7 99%)"
+                "linear-gradient(90deg, #CCD9DC,#EEF2F1)"
+              : theme === 3
+              ? "linear-gradient(90deg,  #444E4C 0%,#415652 25%,#666F68 50%, #666F68 50%,#415652 75%,#444E4C 100%)"
+              : "linear-gradient(60deg,  #075645,#46947a, #075645)",
+          marginLeft: !isChrome && theme === 3 ? "0px" : "",
+          width: `${
+            width -
+            ((isChrome && theme !== 3) || (isFirefox && theme === 3) ? 4 : 3)
+          }px`,
           height: `${30}px`,
           display: "flex",
           justifyContent: "center",
@@ -880,17 +1070,22 @@ const EODSummaryGraph = (props) => {
           ) : (
             <div>
               <span
-                style={{ color: "white", fontWeight: "500" }}
+                style={{
+                  color: theme === 1 ? "#3E4444" : "white",
+                  fontWeight: "500",
+                }}
               >{`${allData.Futures[0].Symbol}`}</span>
               <span
-                style={{ color: "white" }}
+                style={{ color: theme === 1 ? "#3E4444" : "white" }}
               >{` @ ${allData.Futures[0].Last}`}</span>
               <span> (</span>
               <span
                 style={{
                   color:
                     allData.Futures[0].Last - allData.Futures[0].Settle > 0
-                      ? "#84CD85"
+                      ? theme === 1
+                        ? "#15AB54"
+                        : "#84CD85"
                       : "red",
                 }}
               >{`${Intl.NumberFormat("en-US", {
