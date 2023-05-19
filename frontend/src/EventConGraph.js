@@ -831,7 +831,7 @@ const EODSummaryGraph = (props) => {
                   : barLabelType === "Max Profit"
                   ? callMaxProfits[this.point.index]
                   : Math.abs(this.y);
-              if (val === 0 || val === "0%") {
+              if (val === 0 && barLabelType === "Premium") {
                 return "";
               } else {
                 return val;
@@ -877,7 +877,7 @@ const EODSummaryGraph = (props) => {
                   : [1, 2].includes(theme)
                   ? "600"
                   : isChrome
-                  ? "550"
+                  ? "525"
                   : "500",
               //   fontWeight: "bold",
               textOutline: theme === 3 ? "#636D69" : "transparent",
@@ -915,7 +915,7 @@ const EODSummaryGraph = (props) => {
                   : barLabelType === "Max Profit"
                   ? putMaxProfits[this.point.index]
                   : Math.abs(this.y);
-              if (val === 0 || val === "0%") {
+              if (val === 0 && barLabelType === "Premium") {
                 return "";
               } else {
                 return val;
