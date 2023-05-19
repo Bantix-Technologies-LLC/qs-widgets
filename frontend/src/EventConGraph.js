@@ -1316,12 +1316,18 @@ const EODSummaryGraph = (props) => {
           )}
         </div>
         {width >= 450 ? (
-          <BarLabelButtons
-            theme={theme}
-            width={width}
-            barLabelType={barLabelType}
-            setBarLabelType={setBarLabelType}
-          />
+          allData.Futures === undefined ? (
+            <></>
+          ) : (
+            <BarLabelButtons
+              theme={theme}
+              width={width}
+              barLabelType={barLabelType}
+              setBarLabelType={setBarLabelType}
+            />
+          )
+        ) : allData.Futures === undefined ? (
+          <></>
         ) : (
           <BarLabelDropdown
             theme={theme}
