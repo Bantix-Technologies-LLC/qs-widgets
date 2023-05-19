@@ -15,8 +15,6 @@ frontend/build/**
 .env
 */.env
 
-
-
 # pem file
 mern-app.pem
 
@@ -43,4 +41,3 @@ yarn-debug.log*
 yarn-error.log*
 
 .env
-
