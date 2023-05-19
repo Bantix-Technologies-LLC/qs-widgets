@@ -1,4 +1,4 @@
-import React, { useReducer } from "react";
+import React from "react";
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import Spinner from "react-bootstrap/Spinner";
@@ -12,12 +12,13 @@ import stockTools from "highcharts/modules/stock-tools";
 import QSIcon from "./QSIconDark3.png";
 import QSIconLight from "./graphQS.png";
 import QSIconDark from "./QSIconLight.png";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useMediaQuery } from "react-responsive";
-import DropdownButton from "react-bootstrap/DropdownButton";
-import { NavDropdown, Dropdown } from "react-bootstrap";
 import { ExclamationTriangle } from "react-bootstrap-icons";
 import { isChrome, isFirefox, isSafari } from "react-device-detect";
+
+import BarLabelButtons from "./BarLabelButtons";
+import BarLabelDropdown from "./BarLabelDropdown";
 
 // import ExpiryFutSymbolButton from "../../Components/ExpiryFutSymbolButton";
 // import ProdNameToSym from "../../AuxillaryFunctions/ProdNameToSym";
@@ -37,7 +38,15 @@ const EODSummaryGraph = (props) => {
   const [strikeRange, setStrikeRange] = useState(
     Number(searchParams.get("strikerange"))
   );
-  const [theme, setTheme] = useState(Number(searchParams.get("theme")));
+  const [theme, setTheme] = useState(
+    [1, 2, 3].includes(Number(searchParams.get("theme")))
+      ? Number(searchParams.get("theme"))
+      : 0
+  );
+  const [barLabelType, setBarLabelType] = useState(
+    // searchParams.get("labeltype") ||
+    "Premium"
+  );
 
   const zoomButton = useRef(null);
   const isMobile = useMediaQuery({ query: `(max-width: 1200px)` }); //state for detecting device that app is running on
@@ -48,7 +57,21 @@ const EODSummaryGraph = (props) => {
 
   const [categories, setCategories] = useState([[0, 0, 0, 0, 0, 0]]);
   const [callData, setCallData] = useState([[0, 0, 0, 0, 0, 0]]);
+  const [callVols, setCallVols] = useState([[0, 0, 0, 0, 0, 0]]);
+  const [callProbabilities, setCallProbabilities] = useState([
+    [0, 0, 0, 0, 0, 0],
+  ]);
+  const [callChgs, setCallChgs] = useState([[0, 0, 0, 0, 0, 0]]);
+  const [callMaxProfits, setCallMaxProfits] = useState([[0, 0, 0, 0, 0, 0]]);
+
   const [putData, setPutData] = useState([[0, 0, 0, 0, 0, 0]]);
+  const [putVols, setPutVols] = useState([[0, 0, 0, 0, 0, 0]]);
+  const [putProbabilities, setPutProbabilities] = useState([
+    [0, 0, 0, 0, 0, 0],
+  ]);
+  const [putChgs, setPutChgs] = useState([[0, 0, 0, 0, 0, 0]]);
+  const [putMaxProfits, setPutMaxProfits] = useState([[0, 0, 0, 0, 0, 0]]);
+
   const [allData, setAllData] = useState([[0, 0, 0, 0, 0, 0]]);
 
   const [options, setOptions] = useState();
@@ -313,12 +336,12 @@ const EODSummaryGraph = (props) => {
                         y: this.yAxis[0].getExtremes().max / 2,
                         x:
                           categories.length < 3
-                            ? this.xAxis[0].getExtremes().min - 0.45
+                            ? this.xAxis[0].getExtremes().max + 0.45
                             : categories.length < 5
-                            ? this.xAxis[0].getExtremes().min - 0.4
+                            ? this.xAxis[0].getExtremes().max + 0.4
                             : categories.length < 7
-                            ? this.xAxis[0].getExtremes().min - 0.35
-                            : -0.3,
+                            ? this.xAxis[0].getExtremes().max + 0.35
+                            : this.xAxis[0].getExtremes().max + 0.3,
                         yAxis: 0,
                         xAxis: 0,
                       },
@@ -347,12 +370,12 @@ const EODSummaryGraph = (props) => {
                         y: -this.yAxis[0].getExtremes().max / 2,
                         x:
                           categories.length < 3
-                            ? this.xAxis[0].getExtremes().min - 0.45
+                            ? this.xAxis[0].getExtremes().max + 0.45
                             : categories.length < 5
-                            ? this.xAxis[0].getExtremes().min - 0.4
+                            ? this.xAxis[0].getExtremes().max + 0.4
                             : categories.length < 7
-                            ? this.xAxis[0].getExtremes().min - 0.35
-                            : -0.3,
+                            ? this.xAxis[0].getExtremes().max + 0.35
+                            : this.xAxis[0].getExtremes().max + 0.3,
                         yAxis: 0,
                         xAxis: 0,
                       },
@@ -456,11 +479,35 @@ const EODSummaryGraph = (props) => {
 
       tooltip: {
         formatter: function () {
-          return `<span style="font-size:10px">${
-            this.x
-          }</span><br/><span style="color:${this.series.color}">● </span>${
-            this.series.name
-          }: <b> ${this.series.name === "Call" ? -this.y : this.y} `;
+          let val = "";
+          if (this.series.name === "Call") {
+            val =
+              barLabelType === "Premium"
+                ? Math.abs(this.y)
+                : barLabelType === "Volume"
+                ? callVols[this.point.index]
+                : barLabelType === "Probability"
+                ? callProbabilities[this.point.index]
+                : barLabelType === "Change %"
+                ? callChgs[this.point.index]
+                : barLabelType === "Max Profit"
+                ? callMaxProfits[this.point.index]
+                : Math.abs(this.y);
+          } else {
+            val =
+              barLabelType === "Premium"
+                ? Math.abs(this.y)
+                : barLabelType === "Volume"
+                ? putVols[this.point.index]
+                : barLabelType === "Probability"
+                ? putProbabilities[this.point.index]
+                : barLabelType === "Change %"
+                ? putChgs[this.point.index]
+                : barLabelType === "Max Profit"
+                ? putMaxProfits[this.point.index]
+                : Math.abs(this.y);
+          }
+          return `<span style="font-size:10px">${this.x}</span><br/><span style="color:${this.series.color}">● </span>${this.series.name}: <b> ${val} `;
         },
         shadow: [1, 2].includes(theme) ? false : true,
         backgroundColor: "transparent",
@@ -510,6 +557,12 @@ const EODSummaryGraph = (props) => {
           //     enabled: true,
           //     align: "center",
           //   },
+          groupPadding:
+            categories.length > 18
+              ? 0.2
+              : categories.length > 15
+              ? 0.1625
+              : 0.1325,
           borderWidth: 0.5,
         },
       },
@@ -654,7 +707,7 @@ const EODSummaryGraph = (props) => {
           },
 
           categories: categories,
-          reversed: true,
+          reversed: false,
           accessibility: {
             description: "call",
           },
@@ -690,6 +743,10 @@ const EODSummaryGraph = (props) => {
         },
       ],
       yAxis: {
+        // stackLabels: {
+        //   enabled: true, // Enable stack labels
+        //   verticalAlign: "middle",
+        // },
         gridLineColor: [1, 2].includes(theme) ? "#3E4444" : "#E0E0E3",
 
         crosshair: {
@@ -762,37 +819,74 @@ const EODSummaryGraph = (props) => {
           type: "bar",
           dataLabels: {
             formatter: function () {
-              return Math.abs(this.y);
+              let val =
+                barLabelType === "Premium"
+                  ? Math.abs(this.y)
+                  : barLabelType === "Volume"
+                  ? callVols[this.point.index]
+                  : barLabelType === "Probability"
+                  ? callProbabilities[this.point.index]
+                  : barLabelType === "Change %"
+                  ? callChgs[this.point.index]
+                  : barLabelType === "Max Profit"
+                  ? callMaxProfits[this.point.index]
+                  : Math.abs(this.y);
+              if (val === 0 || val === "0%") {
+                return "";
+              } else {
+                return val;
+              }
             },
 
             padding: 5,
             // backgroundColor: "blue",
             // borderWidth: 2,
             animation: {
-              defer: 3000,
+              defer: 2000,
             },
             verticalAlign: "middle",
             style: {
               alpha: "0.5",
 
-              color: [1, 2].includes(theme) ? "#3E4444" : "white",
+              color: [1, 2].includes(theme) ? "#474B49" : "#E9E9E9",
 
               fontSize:
-                width > 550 || height > 550
+                theme === 3
+                  ? width > 550 || height > 550
+                    ? "9px"
+                    : width > 650 || height > 650
+                    ? "10px"
+                    : [1, 2].includes(theme)
+                    ? "9.5px"
+                    : isChrome
+                    ? "9px"
+                    : "10px"
+                  : width > 550 || height > 550
                   ? "9px"
                   : width > 650 || height > 650
                   ? "10px"
-                  : "8px",
-              strokeWidth: "0.2px",
-              fontWeight: "400",
+                  : [1, 2].includes(theme)
+                  ? "9.5px"
+                  : isChrome
+                  ? "9.5"
+                  : "10px",
+              strokeWidth: "0.5px",
+              fontWeight:
+                theme === 0
+                  ? "525"
+                  : [1, 2].includes(theme)
+                  ? "600"
+                  : isChrome
+                  ? "550"
+                  : "500",
               //   fontWeight: "bold",
-              textOutline: "transparent",
+              textOutline: theme === 3 ? "#636D69" : "transparent",
               //   fontStyle: "italic",
             },
             enabled: true,
             align: "right",
             x: -1,
-            y: isChrome ? -2 : -1,
+            y: theme === 0 ? (isChrome ? -1.125 : -1) : isChrome ? -1 : -1,
           },
         },
         {
@@ -808,19 +902,80 @@ const EODSummaryGraph = (props) => {
             position: "right",
             inside: true,
             padding: 2,
-            y: -2,
+            formatter: function () {
+              let val =
+                barLabelType === "Premium"
+                  ? Math.abs(this.y)
+                  : barLabelType === "Volume"
+                  ? putVols[this.point.index]
+                  : barLabelType === "Probability"
+                  ? putProbabilities[this.point.index]
+                  : barLabelType === "Change %"
+                  ? putChgs[this.point.index]
+                  : barLabelType === "Max Profit"
+                  ? putMaxProfits[this.point.index]
+                  : Math.abs(this.y);
+              if (val === 0 || val === "0%") {
+                return "";
+              } else {
+                return val;
+              }
+            },
+            // y: -1,
             style: {
-              color: [1, 2].includes(theme) ? "black" : "#D4D4D4",
-              fontSize: "9px",
+              color:
+                theme === 1 ? "black" : theme === 2 ? "#363A38" : "#D4D4D4",
+              fontSize:
+                theme === 3
+                  ? width > 550 || height > 550
+                    ? "9px"
+                    : width > 650 || height > 650
+                    ? "10px"
+                    : [1, 2].includes(theme)
+                    ? "9.5px"
+                    : isChrome
+                    ? "9px"
+                    : "10px"
+                  : theme === 0
+                  ? isChrome
+                    ? "9.5px"
+                    : "9.5px"
+                  : theme === 1
+                  ? "11px"
+                  : theme === 2
+                  ? "9px"
+                  : "10px",
               strokeWidth: "0px",
-              fontWeight: "600",
+              position: "absolute",
+              top: "10px",
+              fontWeight:
+                theme === 0
+                  ? isChrome
+                    ? "550"
+                    : "525"
+                  : theme === 2
+                  ? "555"
+                  : theme === 1
+                  ? "550"
+                  : "550",
 
               //   fontWeight: "bold",
-              textOutline: [1, 2].includes(theme) ? "white" : "black",
+              textOutline:
+                theme === 1 ? "white" : theme === 2 ? "black" : "black",
               //   fontStyle: "italic",
             },
             align: "left",
             x: 1,
+            y:
+              theme === 0
+                ? isChrome
+                  ? -1.125
+                  : isFirefox
+                  ? -1.5
+                  : -1
+                : [1, 2].includes(theme)
+                ? -1.125
+                : -0.9,
           },
         },
       ],
@@ -885,12 +1040,13 @@ const EODSummaryGraph = (props) => {
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [options, callData, chartRef.current, isMobile]);
+  }, [options, callData, chartRef.current, isMobile, barLabelType]);
 
   const filterStrikes = (strikes, curPrice) => {
-    let filteredStrikes = strikes.filter(
-      (strike) => strike.Call.Mid !== null && strike.Put.Mid !== null
-    );
+    let filteredStrikes = strikes;
+    // .filter(
+    //   (strike) => strike.Call.Bid === null && strike.Put.Mid === null
+    // );
 
     const highPt =
       filteredStrikes.indexOf(
@@ -966,30 +1122,79 @@ const EODSummaryGraph = (props) => {
           //   setPutData(response.data.map((strike) => strike.PutPrice));
 
           const curPrice = response.data.Futures[0].Mid;
+          const settlePrice = response.data.Futures[0].Settle;
           const strikes = response.data.Futures[0].Expirations[0].Strikes;
-          setCategories(
-            filterStrikes(strikes, curPrice).map((strike) => strike.StrikePrice)
+          const filteredStrikes = filterStrikes(strikes, curPrice);
+          const callPremiums = filteredStrikes.map(
+            (strike) =>
+              (strike.Call.Ask !== null
+                ? strike.Call.Ask
+                : strike.Call.Bid !== null
+                ? strike.Call.Bid
+                : 0) * -1
           );
-          setCallData(
-            filterStrikes(strikes, curPrice).map(
-              (strike) => strike.Call.Mid * -1
+          const putPremiums = filteredStrikes.map((strike) =>
+            strike.Put.Ask !== null
+              ? strike.Put.Ask
+              : strike.Put.Bid !== null
+              ? strike.Put.Bid
+              : 0
+          );
+
+          setCategories(filteredStrikes.map((strike) => strike.StrikePrice));
+
+          /////////////
+          //CALL DATA//
+          //CALL DATA//
+          //CALL DATA//
+          //CALL DATA//
+          //CALL DATA//
+          /////////////
+          setCallData(callPremiums);
+          setCallVols(filteredStrikes.map((strike) => strike.Call.TotalVolume));
+          setCallProbabilities(
+            callPremiums.map(
+              (premium) => `${Math.round(Math.abs(premium * 5))}%`
             )
           );
-          setPutData(
-            filterStrikes(strikes, curPrice).map((strike) => strike.Put.Mid)
+          setCallChgs(
+            filteredStrikes.map(
+              (strike) =>
+                `${(
+                  ((strike.StrikePrice - settlePrice) / settlePrice) *
+                  100
+                ).toFixed(1)}%`
+            )
+          );
+          setCallMaxProfits(
+            callPremiums.map((premium) => Math.abs(20 - premium))
+          );
+
+          ////////////
+          //PUT DATA//
+          //PUT DATA//
+          //PUT DATA//
+          //PUT DATA//
+          //PUT DATA//
+          ////////////
+          setPutData(putPremiums);
+          setPutVols(filteredStrikes.map((strike) => strike.Put.TotalVolume));
+          setPutProbabilities(
+            putPremiums.map((premium) => `${Math.round(premium * 5)}%`)
+          );
+          setPutChgs(
+            filteredStrikes.map(
+              (strike) =>
+                `${(
+                  ((strike.StrikePrice - settlePrice) / settlePrice) *
+                  100
+                ).toFixed(1)}%`
+            )
+          );
+          setPutMaxProfits(
+            putPremiums.map((premium) => Math.abs(20 - premium))
           );
         }
-        console.log(
-          response.data.Futures[0].Expirations[0].Strikes.map(
-            (strike) => strike.Put.Last
-          ),
-          response.data.Futures[0].Expirations[0].Strikes.map(
-            (strike) => strike.Call.Last
-          ),
-          response.data.Futures[0].Expirations[0].Strikes.map(
-            (strike) => strike.StrikePrice
-          )
-        );
 
         //   calldata = [];
 
@@ -998,7 +1203,6 @@ const EODSummaryGraph = (props) => {
         // console.log(data);
       }
       try {
-        //make sure scroll position of expiry symbol buttons (top right) goes back to 0
         expButtonsRef.current.__forceSmoothScrollPolyfill__ = true;
         expButtonsRef.current.scrollTo(0, 0);
       } catch {}
@@ -1027,6 +1231,8 @@ const EODSummaryGraph = (props) => {
           : ""
       }`}
       style={{
+        display: "block",
+
         width: `${width}px`,
         height: `${height}px`,
       }}
@@ -1059,12 +1265,24 @@ const EODSummaryGraph = (props) => {
           }px`,
           height: `${30}px`,
           display: "flex",
-          justifyContent: "center",
+          flexDirection: "row",
+
+          flexWrap: "wrap",
+          justifyContent: "left",
           alignItems: "center",
           //   borderBottom: "1px inset blue",
         }}
       >
-        <div style={{ fontWeight: "450" }}>
+        <div
+          style={{
+            // verticalAlign: "middle",
+            fontWeight: "450",
+            marginLeft: "2px",
+            width: "fit-content",
+            flex: "0 1 0",
+            whiteSpace: "nowrap",
+          }}
+        >
           {allData.Futures === undefined ? (
             ""
           ) : (
@@ -1097,6 +1315,21 @@ const EODSummaryGraph = (props) => {
             </div>
           )}
         </div>
+        {width >= 450 ? (
+          <BarLabelButtons
+            theme={theme}
+            width={width}
+            barLabelType={barLabelType}
+            setBarLabelType={setBarLabelType}
+          />
+        ) : (
+          <BarLabelDropdown
+            theme={theme}
+            width={width}
+            barLabelType={barLabelType}
+            setBarLabelType={setBarLabelType}
+          />
+        )}
       </div>
       {/* <img
         src={QSIcon}
