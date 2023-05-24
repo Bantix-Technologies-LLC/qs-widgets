@@ -95,41 +95,60 @@ const EODSummaryGraph = (props) => {
 
     chartRef.current = Highcharts.chart(containerRef.current, {
       chartType: "bar",
-      colors: [1, 2].includes(theme)
-        ? [
-            "rgb(69,158,84,0.9)",
-            "#C4393F",
-            "#942B36",
-            "#024E73",
+      colors:
+        theme === 2
+          ? [
+              "rgb(69,158,84,0.9)",
+              "#DD4047",
+              "#942B36",
+              "#024E73",
 
-            "#E1A33C",
-            "#B31E30",
-            "#B38904",
-            "#B3701E",
-            "#42B39A",
-            "#02757D",
-            "#46947a",
-            "#024E73",
-            "#B3431E",
-            "#f39c12",
-          ]
-        : [
-            "rgb(69,158,84,0.9)",
-            "#AD3236",
-            "#942B36",
-            "#024E73",
+              "#E1A33C",
+              "#B31E30",
+              "#B38904",
+              "#B3701E",
+              "#42B39A",
+              "#02757D",
+              "#46947a",
+              "#024E73",
+              "#B3431E",
+              "#f39c12",
+            ]
+          : theme === 1
+          ? [
+              "rgb(69,158,84,0.9)",
+              "#DD4047",
+              "#942B36",
+              "#024E73",
 
-            "#E1A33C",
-            "#B31E30",
-            "#B38904",
-            "#B3701E",
-            "#42B39A",
-            "#02757D",
-            "#46947a",
-            "#024E73",
-            "#B3431E",
-            "#f39c12",
-          ],
+              "#E1A33C",
+              "#B31E30",
+              "#B38904",
+              "#B3701E",
+              "#42B39A",
+              "#02757D",
+              "#46947a",
+              "#024E73",
+              "#B3431E",
+              "#f39c12",
+            ]
+          : [
+              "rgb(69,158,84,0.9)",
+              "#AD3236",
+              "#942B36",
+              "#024E73",
+
+              "#E1A33C",
+              "#B31E30",
+              "#B38904",
+              "#B3701E",
+              "#42B39A",
+              "#02757D",
+              "#46947a",
+              "#024E73",
+              "#B3431E",
+              "#f39c12",
+            ],
       stockTools: {
         // enabled: false,
         gui: {
@@ -557,13 +576,14 @@ const EODSummaryGraph = (props) => {
           //     enabled: true,
           //     align: "center",
           //   },
+          borderRadius: 2,
           groupPadding:
             categories.length > 18
               ? 0.2
               : categories.length > 15
               ? 0.1625
               : 0.1325,
-          borderWidth: 0.5,
+          borderWidth: 0,
         },
       },
       annotations: [
@@ -693,6 +713,8 @@ const EODSummaryGraph = (props) => {
           gridLineColor: "white",
           labels: {
             style: {
+              fontSize: "0.75em",
+              fontWeight: isChrome ? "525" : "500",
               color: [1, 2].includes(theme) ? "#3E4444" : "#E0E0E3",
             },
             step: 1,
@@ -719,6 +741,9 @@ const EODSummaryGraph = (props) => {
           gridLineColor: "#444",
           labels: {
             style: {
+              fontSize: "0.75em",
+              fontWeight: isChrome ? "525" : "500",
+
               color: [1, 2].includes(theme) ? "#3E4444" : "#E0E0E3",
             },
             step: 1,
@@ -831,14 +856,17 @@ const EODSummaryGraph = (props) => {
                   : barLabelType === "Max Profit"
                   ? callMaxProfits[this.point.index]
                   : Math.abs(this.y);
-              if (val === 0 && barLabelType === "Premium") {
+              if (
+                (val === 0 || val === Number.MIN_VALUE) &&
+                barLabelType === "Premium"
+              ) {
                 return "";
               } else {
                 return val;
               }
             },
 
-            padding: 5,
+            padding: 4,
             // backgroundColor: "blue",
             // borderWidth: 2,
             animation: {
@@ -848,45 +876,37 @@ const EODSummaryGraph = (props) => {
             style: {
               alpha: "0.5",
 
-              color: [1, 2].includes(theme) ? "#474B49" : "#E9E9E9",
+              color:
+                isSafari && theme === 1
+                  ? "rgba(0,0,0,0.55)"
+                  : [1, 2].includes(theme)
+                  ? "#474B49"
+                  : "#E9E9E9",
 
-              fontSize:
+              fontSize: "0.75em",
+
+              strokeWidth: "0.25px",
+              fontWeight: isChrome ? "525" : "500",
+              // fontWeight:
+              //   theme === 0
+              //     ? "525"
+              //     : [1, 2].includes(theme)
+              //     ? "600"
+              //     : isChrome
+              //     ? "550"
+              //     : "500",
+              textOutline:
                 theme === 3
-                  ? width > 550 || height > 550
-                    ? "9px"
-                    : width > 650 || height > 650
-                    ? "10px"
-                    : [1, 2].includes(theme)
-                    ? "9.5px"
-                    : isChrome
-                    ? "9px"
-                    : "10px"
-                  : width > 550 || height > 550
-                  ? "9px"
-                  : width > 650 || height > 650
-                  ? "10px"
-                  : [1, 2].includes(theme)
-                  ? "9.5px"
-                  : isChrome
-                  ? "9.5"
-                  : "10px",
-              strokeWidth: "0.5px",
-              fontWeight:
-                theme === 0
-                  ? "525"
-                  : [1, 2].includes(theme)
-                  ? "600"
-                  : isChrome
-                  ? "525"
-                  : "500",
-              //   fontWeight: "bold",
-              textOutline: theme === 3 ? "#636D69" : "transparent",
+                  ? "#C4C4C4"
+                  : theme === 0
+                  ? "#C4C4C4"
+                  : "rgb(0,0,0,0.5)",
               //   fontStyle: "italic",
             },
             enabled: true,
             align: "right",
-            x: -1,
-            y: theme === 0 ? (isChrome ? -1.125 : -1) : isChrome ? -1 : -1,
+            x: theme === 2 ? -1 : -1,
+            y: isSafari ? -0.75 : -1,
           },
         },
         {
@@ -901,7 +921,7 @@ const EODSummaryGraph = (props) => {
             enabled: true,
             position: "right",
             inside: true,
-            padding: 2,
+            padding: 4,
             formatter: function () {
               let val =
                 barLabelType === "Premium"
@@ -923,59 +943,42 @@ const EODSummaryGraph = (props) => {
             },
             // y: -1,
             style: {
-              color:
-                theme === 1 ? "black" : theme === 2 ? "#363A38" : "#D4D4D4",
-              fontSize:
-                theme === 3
-                  ? width > 550 || height > 550
-                    ? "9px"
-                    : width > 650 || height > 650
-                    ? "10px"
-                    : [1, 2].includes(theme)
-                    ? "9.5px"
-                    : isChrome
-                    ? "9px"
-                    : "10px"
-                  : theme === 0
-                  ? isChrome
-                    ? "9.5px"
-                    : "9.5px"
-                  : theme === 1
-                  ? "11px"
-                  : theme === 2
-                  ? "9px"
-                  : "10px",
-              strokeWidth: "0px",
-              position: "absolute",
-              top: "10px",
-              fontWeight:
-                theme === 0
-                  ? isChrome
-                    ? "550"
-                    : "525"
-                  : theme === 2
-                  ? "555"
-                  : theme === 1
-                  ? "550"
-                  : "550",
+              color: theme === 1 ? "black" : theme === 2 ? "black" : "#D4D4D4",
+              fontSize: "0.75em",
+              strokeWidth: isSafari
+                ? "0.25px"
+                : theme === 2
+                ? "0.25px"
+                : theme === 2
+                ? "0.25"
+                : "0.5px",
 
-              //   fontWeight: "bold",
+              fontWeight: isChrome ? "525" : "500",
+
+              // fontWeight:
+              //   theme === 0
+              //     ? isChrome
+              //       ? "550"
+              //       : "525"
+              //     : theme === 2
+              //     ? "555"
+              //     : theme === 1
+              //     ? "550"
+              //     : "500",
+
               textOutline:
-                theme === 1 ? "white" : theme === 2 ? "black" : "black",
+                theme === 1
+                  ? "rgb(0,0,0,0.5)"
+                  : theme === 2
+                  ? "rgb(0,0,0,0.5)"
+                  : theme === 3
+                  ? "#C4C4C4"
+                  : "#C4C4C4",
               //   fontStyle: "italic",
             },
             align: "left",
             x: 1,
-            y:
-              theme === 0
-                ? isChrome
-                  ? -1.125
-                  : isFirefox
-                  ? -1.5
-                  : -1
-                : [1, 2].includes(theme)
-                ? -1.125
-                : -0.9,
+            y: isSafari ? -0.75 : -1,
           },
         },
       ],
@@ -1131,14 +1134,14 @@ const EODSummaryGraph = (props) => {
                 ? strike.Call.Ask
                 : strike.Call.Bid !== null
                 ? strike.Call.Bid
-                : 0) * -1
+                : Number.MIN_VALUE) * -1 //make zeros values appear on left side of the 0 on y axis with stacking and all
           );
           const putPremiums = filteredStrikes.map((strike) =>
             strike.Put.Ask !== null
               ? strike.Put.Ask
               : strike.Put.Bid !== null
               ? strike.Put.Bid
-              : 0
+              : 0.0
           );
 
           setCategories(filteredStrikes.map((strike) => strike.StrikePrice));
