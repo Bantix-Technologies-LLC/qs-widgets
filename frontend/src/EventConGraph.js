@@ -12,11 +12,11 @@ import stockTools from "highcharts/modules/stock-tools";
 import QSIcon from "./QSIconDark3.png";
 import QSIconLight from "./graphQS.png";
 import QSIconDark from "./QSIconLight.png";
+import PYTLogo from "./logoWM-dark.png";
 import { useSearchParams } from "react-router-dom";
 import { useMediaQuery } from "react-responsive";
 import { ExclamationTriangle } from "react-bootstrap-icons";
 import { isChrome, isFirefox, isSafari } from "react-device-detect";
-
 import BarLabelButtons from "./BarLabelButtons";
 import BarLabelDropdown from "./BarLabelDropdown";
 
@@ -46,6 +46,9 @@ const EODSummaryGraph = (props) => {
   const [barLabelType, setBarLabelType] = useState(
     // searchParams.get("labeltype") ||
     "Premium"
+  );
+  const [coBrandLogoID, setCoBrandLogoID] = useState(
+    Number(searchParams.get("cobrandlogoid")) || 0
   );
 
   const zoomButton = useRef(null);
@@ -465,27 +468,52 @@ const EODSummaryGraph = (props) => {
               // } catch {}
             } catch {}
             // Delete groups
-            if (chart.customImgGroup) {
-              chart.customImgGroup.destroy();
+            if (chart.QSLogo) {
+              chart.QSLogo.destroy();
+            }
+            if (chart.coBrandLogo) {
+              chart.coBrandLogo.destroy();
             }
 
             // Create groups
-            chart.customImgGroup = renderer.g("customImgGroup").add();
-            // Render texts
+            if (loadSpinnerRef.current.style.visibility === "hidden") {
+              chart.QSLogo = renderer.g("QSLogo").add();
+              console.log(chart.plotBox);
+              chart.renderer
+                .image(
+                  [1, 2].includes(theme)
+                    ? QSIconLight
+                    : theme === 3
+                    ? QSIconDark
+                    : QSIcon,
+                  chart.plotBox.x,
+                  40,
+                  50,
+                  50
+                )
+                .add(chart.QSLogo);
 
-            chart.renderer
-              .image(
-                [1, 2].includes(theme)
-                  ? QSIconLight
-                  : theme === 3
-                  ? QSIconDark
-                  : QSIcon,
-                chart.plotBox.width,
-                20,
-                50,
-                50
-              )
-              .add(chart.customImgGroup);
+              if (coBrandLogoID === 1) {
+                chart.coBrandLogo = renderer.g("coBrandLogo").add();
+                console.log(chart.plotBox);
+                chart.renderer
+                  .image(
+                    PYTLogo,
+                    chart.plotBox.width,
+                    chart.plotBox.height - 15,
+                    50,
+                    50
+                  )
+                  .add(chart.coBrandLogo);
+              }
+
+              if (width < 250 || height < 200) {
+                chart.QSLogo.destroy();
+                if (chart.coBrandLogo) {
+                  chart.coBrandLogo.destroy();
+                }
+              }
+            }
           },
           load() {
             // try {
@@ -698,9 +726,6 @@ const EODSummaryGraph = (props) => {
 
       xAxis: [
         {
-          title: {
-            text: "PRemum",
-          },
           plotLines: [
             {
               // mark the weekend
@@ -710,7 +735,6 @@ const EODSummaryGraph = (props) => {
               dashStyle: "longdashdot",
             },
           ],
-          gridLineColor: "white",
           labels: {
             style: {
               fontSize: "0.75em",
@@ -719,7 +743,17 @@ const EODSummaryGraph = (props) => {
             },
             step: 1,
           },
+          gridLineWidth: 1,
+          gridLineColor:
+            theme === 0
+              ? "rgba(164,164,166,0.2)"
+              : [1, 2].includes(theme)
+              ? "rgba(63,64,64,0.1)"
+              : "#444444",
+
           lineColor: "#707073",
+          minorGridLineWidth: 1,
+          tickmarkPlacement: "on",
           minorGridLineColor: "#505053",
           tickColor: "#707073",
           title: {
@@ -735,9 +769,6 @@ const EODSummaryGraph = (props) => {
           },
         },
         {
-          title: {
-            text: "PRemum",
-          },
           gridLineColor: "#444",
           labels: {
             style: {
@@ -772,7 +803,11 @@ const EODSummaryGraph = (props) => {
         //   enabled: true, // Enable stack labels
         //   verticalAlign: "middle",
         // },
-        gridLineColor: [1, 2].includes(theme) ? "#3E4444" : "#E0E0E3",
+        gridLineColor: [1, 2].includes(theme)
+          ? "#3E4444"
+          : theme === 3
+          ? "rgba(224,224,224,0.8)"
+          : "#E0E0E3",
 
         crosshair: {
           label: {
