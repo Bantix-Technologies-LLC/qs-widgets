@@ -299,7 +299,7 @@ const EODSummaryGraph = (props) => {
                   //   dashStyle: "ShortDash",
 
                   value: settlePlotLineValue,
-                  width: 1.5,
+                  width: 2,
                   id: "settle",
                   zIndex: 2,
                 });
@@ -807,11 +807,14 @@ const EODSummaryGraph = (props) => {
         //   enabled: true, // Enable stack labels
         //   verticalAlign: "middle",
         // },
-        gridLineColor: [1, 2].includes(theme)
-          ? "#3E4444"
-          : theme === 3
-          ? "rgba(224,224,224,0.8)"
-          : "#E0E0E3",
+        gridLineColor:
+          theme === 1
+            ? "#3E4444"
+            : theme === 2
+            ? "rgba(91,100,100,0.8)"
+            : theme === 3
+            ? "rgba(224,224,224,0.8)"
+            : "rgba(188,188,188,0.9)",
 
         crosshair: {
           label: {
