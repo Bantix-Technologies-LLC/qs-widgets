@@ -281,6 +281,7 @@ const EODSummaryGraph = (props) => {
                   value: lowPlotLineValue,
                   width: 2,
                   id: "low",
+                  zIndex: 2,
                 });
               if (highPlotLineEnabled)
                 this.xAxis[0].addPlotLine({
@@ -290,6 +291,7 @@ const EODSummaryGraph = (props) => {
                   value: highPlotLineValue,
                   width: 2.5,
                   id: "high",
+                  zIndex: 2,
                 });
               if (settlePlotLineEnabled)
                 this.xAxis[0].addPlotLine({
@@ -299,6 +301,7 @@ const EODSummaryGraph = (props) => {
                   value: settlePlotLineValue,
                   width: 1.5,
                   id: "settle",
+                  zIndex: 2,
                 });
 
               this.xAxis[0].addPlotLine({
@@ -307,6 +310,7 @@ const EODSummaryGraph = (props) => {
                 value: midPlotLineValue,
                 width: 3,
                 id: "mid",
+                zIndex: 2,
               });
               ///////////////////////
               ///YES and NO Labels///
