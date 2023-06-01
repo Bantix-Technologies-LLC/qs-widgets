@@ -480,7 +480,7 @@ const EODSummaryGraph = (props) => {
             }
 
             // Create groups
-            if (loadSpinnerRef.current.style.visibility === "hidden") {
+            if (loadSpinnerRef.current?.style?.visibility === "hidden") {
               chart.QSLogo = renderer.g("QSLogo").add();
               console.log(chart.plotBox);
               chart.renderer
