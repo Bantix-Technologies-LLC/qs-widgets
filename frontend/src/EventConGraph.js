@@ -19,6 +19,7 @@ import { ExclamationTriangle } from "react-bootstrap-icons";
 import { isChrome, isFirefox, isSafari } from "react-device-detect";
 import BarLabelButtons from "./BarLabelButtons";
 import BarLabelDropdown from "./BarLabelDropdown";
+import futToOpt from "./FutToOptMappings";
 
 // import ExpiryFutSymbolButton from "../../Components/ExpiryFutSymbolButton";
 // import ProdNameToSym from "../../AuxillaryFunctions/ProdNameToSym";
@@ -32,7 +33,11 @@ stockTools(Highcharts);
 //Graph for OHLC, Volume, and OI for given future sym
 const EODSummaryGraph = (props) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [sym, setSym] = useState(searchParams.get("sym"));
+  const [sym, setSym] = useState(
+    futToOpt[searchParams.get("sym").toUpperCase()] === undefined
+      ? searchParams.get("sym").toUpperCase()
+      : futToOpt[searchParams.get("sym").toUpperCase()]
+  );
   const [width, setWidth] = useState(searchParams.get("width"));
   const [height, setHeight] = useState(searchParams.get("height"));
   const [strikeRange, setStrikeRange] = useState(
@@ -439,6 +444,7 @@ const EODSummaryGraph = (props) => {
                       point: highPlotLineEnabled
                         ? {
                             y: -20,
+                            cy: 10,
                             x: highPlotLineValue,
                             yAxis: 0,
                             xAxis: 0,
@@ -626,15 +632,15 @@ const EODSummaryGraph = (props) => {
             strokeWidth: 0,
           },
           shapes: [
-            {
-              point: {
-                y: -20,
-                x: allData.Futures === undefined ? 0 : allData.Futures[0].Low,
-                yAxis: 0,
-                xAxis: 0,
-              },
-              fill: "blue",
-            },
+            // {
+            //   point: {
+            //     y: -20,
+            //     x: allData.Futures === undefined ? 0 : allData.Futures[0].Low,
+            //     yAxis: 0,
+            //     xAxis: 0,
+            //   },
+            //   fill: "blue",
+            // },
             {
               point: {
                 y: 50,
@@ -1129,9 +1135,10 @@ const EODSummaryGraph = (props) => {
 
     let CancelToken = axios.CancelToken;
     let source = CancelToken.source();
+
     axios(
       //   `https://quikoptions.info/api/straddles?straddleSym=${sym}`
-      `https://quikoptions.info/api/eventConData?eventConDataProdSym=${sym.toUpperCase()}`,
+      `https://quikoptions.info/api/eventConData?eventConDataProdSym=${sym}`,
       { cancelToken: source.token }
     ).then((response) => {
       console.log(response.data);
@@ -1170,7 +1177,7 @@ const EODSummaryGraph = (props) => {
           const settlePrice = response.data.Futures[0].Settle;
           const strikes = response.data.Futures[0].Expirations[0].Strikes;
           const filteredStrikes = filterStrikes(strikes, curPrice);
-          const callPremiums = filteredStrikes.map(
+          let callPremiums = filteredStrikes.map(
             (strike) =>
               (strike.Call.Ask !== null
                 ? strike.Call.Ask
@@ -1178,6 +1185,9 @@ const EODSummaryGraph = (props) => {
                 ? strike.Call.Bid
                 : Number.MIN_VALUE) * -1 //make zeros values appear on left side of the 0 on y axis with stacking and all
           );
+          if (callPremiums.every((val) => val === Number.MIN_VALUE * -1)) {
+            callPremiums = callPremiums.map(() => 0.0);
+          }
           const putPremiums = filteredStrikes.map((strike) =>
             strike.Put.Ask !== null
               ? strike.Put.Ask
@@ -1196,6 +1206,7 @@ const EODSummaryGraph = (props) => {
           //CALL DATA//
           /////////////
           setCallData(callPremiums);
+          console.log(callPremiums);
           setCallVols(filteredStrikes.map((strike) => strike.Call.TotalVolume));
           setCallProbabilities(
             callPremiums.map(
