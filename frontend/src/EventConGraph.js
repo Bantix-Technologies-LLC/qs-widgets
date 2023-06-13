@@ -1111,14 +1111,30 @@ const EODSummaryGraph = (props) => {
       return filteredStrikes;
     }
 
-    let includeExtraStrikeAboveOrAtATM =
-      filteredStrikes[highPt].StrikePrice - curPrice <
-      curPrice - filteredStrikes[lowPt].StrikePrice;
+    console.log(
+      "!!",
+      filteredStrikes[highPt - strikeRange],
+      filteredStrikes[lowPt + strikeRange],
+      curPrice
+    );
 
+    let includeExtraStrikeAboveOrAtATM =
+      filteredStrikes[highPt - strikeRange].StrikePrice - curPrice <
+      curPrice - filteredStrikes[lowPt + strikeRange].StrikePrice;
+
+    // console.log(
+    //   filteredStrikes[highPt].StrikePrice - curPrice,
+    //   "< ",
+    //   curPrice - filteredStrikes[lowPt].StrikePrice,
+    //   highPt,
+    //   lowPt
+    // );
+    console.log("!!", includeExtraStrikeAboveOrAtATM);
     filteredStrikes = filteredStrikes.filter((strike, i) => {
       if (includeExtraStrikeAboveOrAtATM) return i < highPt + 1 && i > lowPt;
       else return i < highPt && i > lowPt - 1;
     });
+
     return filteredStrikes;
   };
 
