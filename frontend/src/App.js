@@ -12,6 +12,7 @@ import {
   BrowserRouter as Router,
   useLocation,
   useHistory,
+  useSearchParams
 } from "react-router-dom";
 // import { useRouter } from "next/router";
 import { TransitionGroup, CSSTransition } from "react-transition-group";

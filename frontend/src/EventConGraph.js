@@ -1095,9 +1095,6 @@ const EODSummaryGraph = (props) => {
 
   const filterStrikes = (strikes, curPrice) => {
     let filteredStrikes = strikes;
-    // .filter(
-    //   (strike) => strike.Call.Bid === null && strike.Put.Mid === null
-    // );
 
     const highPt =
       filteredStrikes.indexOf(
@@ -1114,8 +1111,13 @@ const EODSummaryGraph = (props) => {
       return filteredStrikes;
     }
 
+    let includeExtraStrikeAboveOrAtATM =
+      filteredStrikes[highPt].StrikePrice - curPrice <
+      curPrice - filteredStrikes[lowPt].StrikePrice;
+
     filteredStrikes = filteredStrikes.filter((strike, i) => {
-      return i < highPt && i > lowPt;
+      if (includeExtraStrikeAboveOrAtATM) return i < highPt + 1 && i > lowPt;
+      else return i < highPt && i > lowPt - 1;
     });
     return filteredStrikes;
   };
